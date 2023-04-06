@@ -82,6 +82,7 @@ while True:
             password = input("Informe sua senha: ")
             if password == user.password:
                 print("Acesso garantido.")
+                
                 while True:
                     action = input("\nQue ação deseja realizar?\
                                     \n\"Ler\": Ver suas contas.\
@@ -114,8 +115,29 @@ while True:
                         break
             else:
                 print("Acesso negado.")
+        
         else:
             print("Usuário inexistente.")
     
-    elif action == "olhar":
-        users.olhar()
+    elif action == "devtools":
+        while True:
+            action = input("\nEstá é uma ferramenta para testes, que função deseja realizar?\
+                            \n\"Gerar\": Gera alguma quantidade de usuários aleatórios.\
+                            \n\"Vizualizar\": Vizualiza todos os usuários existentes.\
+                            \n\"Sair\": Sai das ferramentas de testes e renorna ao início.\n").lower()
+
+            if action == "sair":
+                break
+
+            if action == "gerar":
+                lower_abc = "abcdefghijklmnopqrstuvwxyz"
+                upper_ABC = lower_abc.upper()
+                letters = lower_abc + upper_ABC
+                generatedUsers = int(input("Quantos usuários aleatórios você deseja gerar? "))
+                for i in range(generatedUsers):
+                    username = "".join(random.sample(letters, random.randint(3, 8)))
+                    user = userInfo(username, "randomUser")
+                    users.setUser(user)
+            
+            if action == "vizualizar":
+                users.olhar()
