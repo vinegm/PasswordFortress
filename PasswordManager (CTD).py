@@ -44,9 +44,9 @@ class usersTable:
                 break
         if found == False:
             self.users[i].append((user))
-
-        
-
+    
+    def deleteUser (Self, user):
+        return
 
 
 users = usersTable()
@@ -65,13 +65,14 @@ while True:
     elif action == "entrar":
         search = input("Informe seu usuário: ")
         user = users.getUser(search)
-        #user.lookUser()
-        
-        password = input("Informe sua senha: ")
-        if password == user.password:
-            print("Acesso garantido.")
+        if user != None:
+            password = input("Informe sua senha: ")
+            if password == user.password:
+                print("Acesso garantido.")
+            else:
+                print("Acesso negado.")
         else:
-            print("Acesso negado.")
+            print("Usuário inexistente.")
     
     elif action == "olhar":
         users.olhar()
