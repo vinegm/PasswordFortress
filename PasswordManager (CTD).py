@@ -48,7 +48,6 @@ class usersTable:
     def deleteUser (self, user): #users.deleteUser(user)
         username = user.getUsername()
         i = self.hashIndex(username)
-        found = False
         for j, registerUser in enumerate(self.users[i]):
             if registerUser.getUsername() == username:
                 del self.users[i][j]
