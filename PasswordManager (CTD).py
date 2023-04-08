@@ -1,7 +1,10 @@
 import random
 import pickle
+import hashlib
 
+# 
 class userInfo:
+
     def __init__(self, username, password):
         self.username = username
         self.password = password
@@ -9,7 +12,7 @@ class userInfo:
 
     def getAccounts (self):
         return self.accounts()
-    
+
     def getUsername (self):
         return self.username
 
@@ -23,7 +26,11 @@ class usersTable:
 
     def olhar(self):
         for i in range(self.tableSize):
-            print(self.users[i])
+            print(f"\nlista: {i+1}")
+            for j, registerUser in enumerate(self.users[i]):
+                print(f"{self.users[i][j].getUsername()}", end = "") # autoral pelo bolas
+                if j != (len(self.users[i])-1):
+                    print(", ", end = "")
 
     def hashIndex (self, username):
         index = 0
@@ -79,7 +86,7 @@ while True:
     
     elif action == "registrar":
         username = input("Informe um usuário: ")
-        password = input("Informe uma senha: ")
+        password = hashlib.md5(input("Informe uma senha: ").encode()).hexdigest()
         user = userInfo(username, password)
         users.setUser(user)
 
@@ -95,10 +102,9 @@ while True:
         if user == None:
             print("Usuário inexistente.")
         else:
-            password = input("Informe sua senha: ")
+            password = hashlib.md5(input("Informe sua senha: ").encode()).hexdigest()
             if password != user.password:
                 print("Acesso negado.")
-
             else:
                 while True:
                     action = input("\nQue ação deseja realizar?\
@@ -125,7 +131,7 @@ while True:
                             print("Conta inexistente.")
 
                     if action == "apagar":
-                        password = input("Informe sua senha para confirmar: ")
+                        password = hashlib.md5(input("Informe sua senha para confirmar: ").encode()).hexdigest()
                         if password == user.password:
                             users.deleteUser(user)
                             print("Seu usuário foi deletado.")
@@ -140,7 +146,7 @@ while True:
         while True:
             action = input("\nEstá é uma ferramenta para testes, que função deseja realizar?\
                             \n\"Gerar\": Gera alguma quantidade de usuários aleatórios.\
-                            \n\"Vizualizar\": Vizualiza todos os usuários existentes.\
+                            \n\"Visualizar\": Vizualiza todos os usuários existentes.\
                             \n\"Sair\": Sai das ferramentas de testes e renorna ao início.\n").lower()
 
             if action == "sair":
