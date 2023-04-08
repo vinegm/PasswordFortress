@@ -92,11 +92,14 @@ while True:
     elif action == "entrar":
         search = input("Informe seu usuário: ")
         user = users.getUser(search)
-        if user != None:
+        if user == None:
+            print("Usuário inexistente.")
+        else:
             password = input("Informe sua senha: ")
-            if password == user.password:
-                print("Acesso garantido.")
-                
+            if password != user.password:
+                print("Acesso negado.")
+
+            else:
                 while True:
                     action = input("\nQue ação deseja realizar?\
                                     \n\"Ler\": Ver suas contas.\
@@ -132,12 +135,6 @@ while True:
 
                     if action == "sair":
                         break
-
-            else:
-                print("Acesso negado.")
-        
-        else:
-            print("Usuário inexistente.")
     
     elif action == "devtools":
         while True:
