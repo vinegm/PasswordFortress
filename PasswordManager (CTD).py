@@ -1,4 +1,5 @@
 import random
+import pickle
 
 class userInfo:
     def __init__(self, username, password):
@@ -56,9 +57,17 @@ class usersTable:
                 del self.users[i][j]
                 break
 
-
-
 users = usersTable()
+
+try: 
+    with open("SavedUsers.pickle", "rb") as file:
+        for line in file.readlines():
+            serializedUser = line.rstrip()
+            user = pickle.loads(serializedUser)
+            users.setUser(user)
+except FileNotFoundError:
+    pass
+
 while True:
     action = input("\nQue ação deseja realizar?\
                    \n\"Registrar\": Registra um novo usuário.\
@@ -89,19 +98,23 @@ while True:
                                     \n\"Remover\": Remove uma conta existente.\
                                     \n\"Apagar\": Apaga seu usuário.\
                                     \n\"Sair\": Sai do seu usuário e renorna ao início.\n").lower()
+                    
                     if action == "ler":
                         for plataform, plataformPassword in user.accounts.items():
                             print(f"{plataform}: {plataformPassword}")
+
                     if action == "adicionar":
                         plataform = input("Informe a plataforma: ")
                         plataformPassword = input("Informe a senha: ")
                         user.accounts[plataform] = plataformPassword
+
                     if action == "remover":
                         plataform = input("Informe a plataforma que deseja remover: ")
                         if plataform in user.accounts:
                             del user.accounts[plataform]
                         else:
                             print("Conta inexistente.")
+
                     if action == "apagar":
                         password = input("Informe sua senha para confirmar: ")
                         if password == user.password:
@@ -110,8 +123,10 @@ while True:
                             break
                         else:
                             print("Senha incorreta.")
+
                     if action == "sair":
                         break
+
             else:
                 print("Acesso negado.")
         
@@ -138,5 +153,5 @@ while True:
                     user = userInfo(username, "randomUser")
                     users.setUser(user)
             
-            if action == "vizualizar":
+            if action == "visualizar":
                 users.olhar()

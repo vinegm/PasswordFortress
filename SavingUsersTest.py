@@ -4,9 +4,18 @@ class userInfo:
     def __init__(self, username, password):
         self.username = username
         self.password = password
+        self.accounts = dict()
 
+    def getAccounts (self):
+        return self.accounts()
+    
     def getUsername (self):
         return self.username
+
+    def lookUser (self):
+        print(f"user: {self.username} \npassword: {self.password}")
+
+
 
 while True:  
     a = input()
@@ -15,7 +24,6 @@ while True:
 
         user = userInfo("vine", "123")
 
-        
         serializedUser = pickle.dumps(user)
         with open("SavedUsers.pickle", "ab") as file:
             file.write(serializedUser)
@@ -26,12 +34,14 @@ while True:
 
     elif a == "2":
 
-        with open("SavedUsers.pickle", "rb") as file:
-            for line in file.readlines():
-                serializedUser = line.rstrip()
-                user = pickle.loads(serializedUser)
-                print(user.getUsername())
-
-        break
+        try: 
+            with open("SavedUsers.pickle", "rb") as file:
+                for line in file.readlines():
+                    serializedUser = line.rstrip()
+                    user = pickle.loads(serializedUser)
+                    print(user.getUsername())
+                    break
+        except FileNotFoundError:
+            pass
     
     break
