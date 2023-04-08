@@ -82,6 +82,12 @@ while True:
         password = input("Informe uma senha: ")
         user = userInfo(username, password)
         users.setUser(user)
+
+        serializedUser = pickle.dumps(user)
+        with open("SavedUsers.pickle", "ab") as file:
+            file.write(serializedUser)
+        with open("SavedUsers.pickle", "a") as file:
+            file.write("\n")
     
     elif action == "entrar":
         search = input("Informe seu usuário: ")
