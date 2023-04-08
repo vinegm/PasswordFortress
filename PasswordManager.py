@@ -92,7 +92,7 @@ while True:
         for i in range(users.tableSize):
             for j, registerUser in enumerate(users.users[i]):
                 if users.users[i][j].getUsername() == username:
-                    print("Esse usuário existe!")
+                    print("Esse usuário já existe!")
                     existe = True
                     break
             if existe == True:
