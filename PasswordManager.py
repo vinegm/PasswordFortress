@@ -69,7 +69,7 @@ class usersTable:
 users = usersTable()
 
 try: 
-    with open("SavedUsers.pickle", "rb") as file:
+    with open("SavedUsers.users", "rb") as file:
         for line in file.readlines():
             serializedUser = line.rstrip()
             user = pickle.loads(serializedUser)
@@ -103,7 +103,7 @@ while True:
             user = userInfo(username, password)
             users.setUser(user)
             serializedUser = pickle.dumps(user) + b"\n"
-            with open("SavedUsers.pickle", "ab") as file:
+            with open("SavedUsers.users", "ab") as file:
                 file.write(serializedUser)
             print("usuário salvo!")
     
@@ -153,7 +153,7 @@ while True:
 
                     if action == "sair":
                         userLine = 0
-                        with open("SavedUsers.pickle", "rb") as file:
+                        with open("SavedUsers.users", "rb") as file:
                             for line in (editUser := file.readlines()):
                                 serializedUser = line.rstrip()
                                 lookingForUser = pickle.loads(serializedUser)
@@ -161,7 +161,7 @@ while True:
                                     serializedUser = pickle.dumps(user)
                                     break
                                 userLine +=1
-                        with open("SavedUsers.pickle", "wb") as file:
+                        with open("SavedUsers.users", "wb") as file:
                             editUser[userLine] = serializedUser + b"\n"
                             file.writelines(editUser)
                         break
