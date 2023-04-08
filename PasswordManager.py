@@ -2,7 +2,6 @@ import random
 import pickle
 import hashlib
 
-# 
 class userInfo:
 
     def __init__(self, username, password):
@@ -24,13 +23,17 @@ class usersTable:
         self.tableSize = 100
         self.users = [[] for i in range(self.tableSize)]
 
-    def olhar(self):
+    def getAllUsers(self):
         for i in range(self.tableSize):
-            print(f"\nlista: {i+1}")
-            for j, registerUser in enumerate(self.users[i]):
-                print(f"{self.users[i][j].getUsername()}", end = "") # autoral pelo bolas
-                if j != (len(self.users[i])-1):
-                    print(", ", end = "")
+            #if len(self.users) =
+            if len(self.users[i]) == 0:
+                pass
+            else:
+                print(f"\nIndexKey: {i}")
+                for j, registerUser in enumerate(self.users[i]):
+                    print(f"{self.users[i][j].getUsername()}", end = "")
+                    if j != (len(self.users[i])-1):
+                        print(", ", end = "")
 
     def hashIndex (self, username):
         index = 0
@@ -67,7 +70,7 @@ class usersTable:
 users = usersTable()
 
 try: 
-    with open("SavedUsers.pickle", "rb") as file:
+    with open("SavedUsers.txt", "rb") as file:
         for line in file.readlines():
             serializedUser = line.rstrip()
             user = pickle.loads(serializedUser)
@@ -90,11 +93,9 @@ while True:
         user = userInfo(username, password)
         users.setUser(user)
 
-        serializedUser = pickle.dumps(user)
-        with open("SavedUsers.pickle", "ab") as file:
+        serializedUser = pickle.dumps(user) + b"\n"
+        with open("SavedUsers.txt", "ab") as file:
             file.write(serializedUser)
-        with open("SavedUsers.pickle", "a") as file:
-            file.write("\n")
     
     elif action == "entrar":
         search = input("Informe seu usuário: ")
@@ -140,6 +141,18 @@ while True:
                             print("Senha incorreta.")
 
                     if action == "sair":
+                        userLine = 0
+                        with open("SavedUsers.txt", "rb") as file:
+                            for line in (editUser := file.readlines()):
+                                serializedUser = line.rstrip()
+                                lookingForUser = pickle.loads(serializedUser)
+                                if lookingForUser.getUsername() == user.getUsername():
+                                    serializedUser = pickle.dumps(user)
+                                    break
+                                userLine +=1
+                        with open("SavedUsers.txt", "wb") as file:
+                            editUser[userLine] = serializedUser + b"\n"
+                            file.writelines(editUser)
                         break
     
     elif action == "devtools":
@@ -163,4 +176,4 @@ while True:
                     users.setUser(user)
             
             if action == "visualizar":
-                users.olhar()
+                users.getAllUsers()
