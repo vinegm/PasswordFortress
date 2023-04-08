@@ -25,7 +25,6 @@ class usersTable:
 
     def getAllUsers(self):
         for i in range(self.tableSize):
-            #if len(self.users) =
             if len(self.users[i]) == 0:
                 pass
             else:
@@ -89,13 +88,24 @@ while True:
     
     elif action == "registrar":
         username = input("Informe um usuário: ")
-        password = hashlib.md5(input("Informe uma senha: ").encode()).hexdigest()
-        user = userInfo(username, password)
-        users.setUser(user)
+        existe = False
+        for i in range(users.tableSize):
+            for j, registerUser in enumerate(users.users[i]):
+                if users.users[i][j].getUsername() == username:
+                    print("Esse usuário existe!")
+                    existe = True
+                    break
+            if existe == True:
+                break
 
-        serializedUser = pickle.dumps(user) + b"\n"
-        with open("SavedUsers.txt", "ab") as file:
-            file.write(serializedUser)
+        if existe == False:
+            password = hashlib.md5(input("Informe uma senha: ").encode()).hexdigest()
+            user = userInfo(username, password)
+            users.setUser(user)
+            serializedUser = pickle.dumps(user) + b"\n"
+            with open("SavedUsers.txt", "ab") as file:
+                file.write(serializedUser)
+            print("usuário salvo!")
     
     elif action == "entrar":
         search = input("Informe seu usuário: ")
