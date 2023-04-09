@@ -3,8 +3,8 @@ import pickle
 import hashlib
 import timeit
 
+# Classe responsável por segurar as informações do usuário
 class userInfo:
-
     def __init__(self, username, password):
         self.username = username
         self.password = password
@@ -16,14 +16,13 @@ class userInfo:
     def getUsername (self):
         return self.username
 
-    def lookUser (self):
-        print(f"user: {self.username} \npassword: {self.password}")
-
+# Hashtable que contém todos os usuários criados
 class usersTable:
     def __init__ (self) :
-        self.tableSize = 960
+        self.tableSize = 320
         self.users = [[] for i in range(self.tableSize)]
 
+    # Função responsável por imprimir todos os usuários ao console para meios interativos
     def getAllUsers(self):
         for i in range(self.tableSize):
             if len(self.users[i]) == 0:
@@ -35,12 +34,14 @@ class usersTable:
                     if j != (len(self.users[i])-1):
                         print(", ", end = "")
 
+    # Função responsável por tornar o username do usuário em uma chave hash
     def hashIndex (self, username):
         index = 0
         for char in username:
             index += ord(char)
         return index % self.tableSize
     
+    # Função responsável por calcular o tempo de busca de um usuário de forma sequencial
     def getUserSequential (self, search):
         startTimer = timeit.default_timer()
         for i in range(self.tableSize):
@@ -49,10 +50,11 @@ class usersTable:
                     stopTimer = timeit.default_timer()
                     print(f"encontrado Sequential em {(stopTimer - startTimer):.6f} segundos")
                     return
-                
+    
+    # Função responsável por calcular o tempo de busca de um usuário de forma binária
     def getUserBinary (self, search):
-        userIndex = self.hashIndex(search)
         startTimer = timeit.default_timer()
+        userIndex = self.hashIndex(search)
         lowerPos = 0
         biggerPos = self.tableSize - 1
         while lowerPos <= biggerPos:
@@ -68,12 +70,24 @@ class usersTable:
             if middlePos < userIndex:
                 lowerPos = middlePos + 1
 
+    # Função responsável por calcular o tempo de busca de um usuário em hash.
+    def getUserHash (self, search):
+        startTimer = timeit.default_timer()
+        i = self.hashIndex(search)
+        for registeredUser in self.users[i]:
+            if registeredUser.getUsername() == search:
+                stopTimer = timeit.default_timer()
+                print(f"Encontrado Hash em {(stopTimer - startTimer):.6f} segundos")
+                return
+
+    # Busca o usuário no sistema por hash, identica a função temporizada.
     def getUser (self, search):       
         i = self.hashIndex(search)
         for registeredUser in self.users[i]:
             if registeredUser.getUsername() == search:
                 return registeredUser
     
+    # Função responsável por adicionar o usuário a lista
     def setUser (self, user):
         username = user.getUsername()
         i = self.hashIndex(username)
@@ -86,6 +100,7 @@ class usersTable:
         if found == False:
             self.users[i].append((user))
     
+    # Função responsável por remover um usuário da lista
     def deleteUser (self, user):
         username = user.getUsername()
         i = self.hashIndex(username)
@@ -96,6 +111,7 @@ class usersTable:
 
 users = usersTable()
 
+# Processo de buscar usuários salvos fora do programa, caso existam
 try: 
     with open("SavedUsers.users", "rb") as file:
         for line in file.readlines():
@@ -112,11 +128,12 @@ while True:
                    \n\"Sair\": Fecha o programa.\n").lower()
     
     if action == "sair":
-        break
+        quit()
     
     elif action == "registrar":
         username = input("Informe um usuário: ")
         exists = False
+        # Processo de verificar se o username do usuário já está em uso
         for i in range(users.tableSize):
             for j, registerUser in enumerate(users.users[i]):
                 if users.users[i][j].getUsername() == username:
@@ -127,9 +144,12 @@ while True:
                 break
 
         if exists == False:
+            # Finalização do cadastro
             password = hashlib.md5(input("Informe uma senha: ").encode()).hexdigest()
             user = userInfo(username, password)
+            # Processo de inserir o novo usuário na lista
             users.setUser(user)
+            # Processo de salvar o novo usuário externamente
             serializedUser = pickle.dumps(user) + b"\n"
             with open("SavedUsers.users", "ab") as file:
                 file.write(serializedUser)
@@ -173,6 +193,7 @@ while True:
                         password = hashlib.md5(input("Informe sua senha para confirmar: ").encode()).hexdigest()
                         if password == user.password:
                             userLine = 0
+                            # Processo de deletar o usuário externamente
                             with open("SavedUsers.users", "rb") as file:
                                 for line in (editUser := file.readlines()):
                                     serializedUser = line.rstrip()
@@ -183,6 +204,7 @@ while True:
                             with open("SavedUsers.users", "wb") as file:
                                 del editUser[userLine]
                                 file.writelines(editUser)
+                            # Processo de deletar o usuário da lista
                             users.deleteUser(user)
                             print("Seu usuário foi deletado.")
                             break
@@ -191,6 +213,7 @@ while True:
 
                     if action == "sair":
                         userLine = 0
+                        # Processo de salvar as mudanças feitas externamente
                         with open("SavedUsers.users", "rb") as file:
                             for line in (editUser := file.readlines()):
                                 serializedUser = line.rstrip()
@@ -216,6 +239,7 @@ while True:
                 break
 
             if action == "gerar":
+                # Processo de gerar usuários aleatórios para simular um sistema com múltiplos usuários
                 lower_abc = "abcdefghijklmnopqrstuvwxyz"
                 upper_ABC = lower_abc.upper()
                 letters = lower_abc + upper_ABC
@@ -226,14 +250,12 @@ while True:
                     users.setUser(user)
             
             if action == "visualizar":
+                # Processo de visualizar todos os usuários registrados na lista
                 users.getAllUsers()
 
             if action == "teste":
+                # Processo de testar a velocidade dos meios de busca
                 search = input("Qual usuário você procura? ")
                 users.getUserSequential(search)
                 users.getUserBinary(search)
-                startTimer = timeit.default_timer()
-                users.getUser(search)
-                stopTimer = timeit.default_timer()
-                print(f"Encontrado hash em {(stopTimer - startTimer):.6f} segundos")
-                
+                users.getUserHash(search)
