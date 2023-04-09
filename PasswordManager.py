@@ -1,6 +1,7 @@
 import random
 import pickle
 import hashlib
+import time
 
 class userInfo:
 
@@ -20,7 +21,7 @@ class userInfo:
 
 class usersTable:
     def __init__ (self) :
-        self.tableSize = 100
+        self.tableSize = 960
         self.users = [[] for i in range(self.tableSize)]
 
     def getAllUsers(self):
@@ -40,6 +41,33 @@ class usersTable:
             index += ord(char)
         return index % self.tableSize
     
+    def getUserSequential (self, search):
+        startTimer = time.time()
+        for i in range(self.tableSize):
+            for registeredUser in self.users[i]:
+                if registeredUser.getUsername() == search:
+                    stopTimer = time.time()
+                    print(f"encontrado Sequential em {(stopTimer - startTimer):.20f} segundos")
+                    return
+                
+    def getUserBinary (self, search):
+        userIndex = self.hashIndex(search)
+        startTimer = time.time()
+        lowerPos = 0
+        biggerPos = self.tableSize - 1
+        while lowerPos <= biggerPos:
+            middlePos = (lowerPos + biggerPos) // 2
+            if middlePos == userIndex:
+                for registeredUser in self.users[userIndex]:
+                    if registeredUser.getUsername() == search:
+                        stopTimer = time.time()
+                        print(f"Encontrado Binary em {(stopTimer - startTimer):.20f} segundos")
+                        return
+            if middlePos > userIndex:
+                biggerPos = middlePos - 1
+            if middlePos < userIndex:
+                lowerPos = middlePos + 1
+
     def getUser (self, search):       
         i = self.hashIndex(search)
         for registeredUser in self.users[i]:
@@ -88,17 +116,17 @@ while True:
     
     elif action == "registrar":
         username = input("Informe um usuário: ")
-        existe = False
+        exists = False
         for i in range(users.tableSize):
             for j, registerUser in enumerate(users.users[i]):
                 if users.users[i][j].getUsername() == username:
                     print("Esse usuário já existe!")
-                    existe = True
+                    exists = True
                     break
-            if existe == True:
+            if exists == True:
                 break
 
-        if existe == False:
+        if exists == False:
             password = hashlib.md5(input("Informe uma senha: ").encode()).hexdigest()
             user = userInfo(username, password)
             users.setUser(user)
@@ -181,6 +209,7 @@ while True:
             action = input("\nEstá é uma ferramenta para testes, que função deseja realizar?\
                             \n\"Gerar\": Gera alguma quantidade de usuários aleatórios.\
                             \n\"Visualizar\": Vizualiza todos os usuários existentes.\
+                            \n\"Teste\": Testa a velocidade dos meios de busca.\
                             \n\"Sair\": Sai das ferramentas de testes e renorna ao início.\n").lower()
 
             if action == "sair":
@@ -198,3 +227,13 @@ while True:
             
             if action == "visualizar":
                 users.getAllUsers()
+
+            if action == "teste":
+                search = input("Qual usuário você procura? ")
+                users.getUserSequential(search)
+                users.getUserBinary(search)
+                startTimer = time.time()
+                users.getUser(search)
+                stopTimer = time.time()
+                print(f"Encontrado hash em {(stopTimer - startTimer):.20f} segundos")
+                
