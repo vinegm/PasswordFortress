@@ -1,7 +1,7 @@
 import random
 import pickle
 import hashlib
-import time
+import timeit
 
 class userInfo:
 
@@ -42,17 +42,17 @@ class usersTable:
         return index % self.tableSize
     
     def getUserSequential (self, search):
-        startTimer = time.time()
+        startTimer = timeit.default_timer()
         for i in range(self.tableSize):
             for registeredUser in self.users[i]:
                 if registeredUser.getUsername() == search:
-                    stopTimer = time.time()
-                    print(f"encontrado Sequential em {(stopTimer - startTimer):.20f} segundos")
+                    stopTimer = timeit.default_timer()
+                    print(f"encontrado Sequential em {(stopTimer - startTimer):.6f} segundos")
                     return
                 
     def getUserBinary (self, search):
         userIndex = self.hashIndex(search)
-        startTimer = time.time()
+        startTimer = timeit.default_timer()
         lowerPos = 0
         biggerPos = self.tableSize - 1
         while lowerPos <= biggerPos:
@@ -60,8 +60,8 @@ class usersTable:
             if middlePos == userIndex:
                 for registeredUser in self.users[userIndex]:
                     if registeredUser.getUsername() == search:
-                        stopTimer = time.time()
-                        print(f"Encontrado Binary em {(stopTimer - startTimer):.20f} segundos")
+                        stopTimer = timeit.default_timer()
+                        print(f"Encontrado Binary em {(stopTimer - startTimer):.6f} segundos")
                         return
             if middlePos > userIndex:
                 biggerPos = middlePos - 1
@@ -112,7 +112,7 @@ while True:
                    \n\"Sair\": Fecha o programa.\n").lower()
     
     if action == "sair":
-        quit()
+        break
     
     elif action == "registrar":
         username = input("Informe um usuário: ")
@@ -232,8 +232,8 @@ while True:
                 search = input("Qual usuário você procura? ")
                 users.getUserSequential(search)
                 users.getUserBinary(search)
-                startTimer = time.time()
+                startTimer = timeit.default_timer()
                 users.getUser(search)
-                stopTimer = time.time()
-                print(f"Encontrado hash em {(stopTimer - startTimer):.20f} segundos")
+                stopTimer = timeit.default_timer()
+                print(f"Encontrado hash em {(stopTimer - startTimer):.6f} segundos")
                 
