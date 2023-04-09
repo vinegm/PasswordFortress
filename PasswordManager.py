@@ -142,9 +142,19 @@ while True:
                             print("Conta inexistente.")
 
                     if action == "apagar":
-                        # apagar o user salvo no txt tbm
                         password = hashlib.md5(input("Informe sua senha para confirmar: ").encode()).hexdigest()
                         if password == user.password:
+                            userLine = 0
+                            with open("SavedUsers.users", "rb") as file:
+                                for line in (editUser := file.readlines()):
+                                    serializedUser = line.rstrip()
+                                    lookingForUser = pickle.loads(serializedUser)
+                                    if lookingForUser.getUsername() == user.getUsername():
+                                        break
+                                    userLine +=1
+                            with open("SavedUsers.users", "wb") as file:
+                                del editUser[userLine]
+                                file.writelines(editUser)
                             users.deleteUser(user)
                             print("Seu usuário foi deletado.")
                             break
