@@ -3,6 +3,9 @@ import pickle
 import hashlib
 import timeit
 
+# Link da apresentação:
+# https://docs.google.com/presentation/d/14Zd6fDJbgf_g8AuVjajRNByQ6G67CAFfbbH2vvIYiUc/edit#slide=id.p
+
 # Classe responsável por segurar as informações do usuário
 class userInfo:
     def __init__(self, username, password):
@@ -22,7 +25,7 @@ class usersTable:
         self.tableSize = 320
         self.users = [[] for i in range(self.tableSize)]
 
-    # Função responsável por imprimir todos os usuários ao console para meios interativos
+    # Função responsável por imprimir todos os usuários ao terminal para meios interativos
     def getAllUsers(self):
         for i in range(self.tableSize):
             if len(self.users[i]) == 0:
@@ -44,41 +47,50 @@ class usersTable:
     # Função responsável por calcular o tempo de busca de um usuário de forma sequencial
     def getUserSequential (self, search):
         startTimer = timeit.default_timer()
-        for i in range(self.tableSize):
-            for registeredUser in self.users[i]:
-                if registeredUser.getUsername() == search:
+        for i in range(self.tableSize): # Corre pelos slots em ordem para tentar encontrar o usuário
+            for registeredUser in self.users[i]: # Corre pelos usuários salvos no slot para verificar se o usuário está lá
+                if registeredUser.getUsername() == search: # Ao encontrar o usuário no slot entra nesse if, finalizando a função
                     stopTimer = timeit.default_timer()
-                    print(f"encontrado Sequential em {(stopTimer - startTimer):.6f} segundos")
+                    print(f"Encontrado (Sequencial) em {(stopTimer - startTimer):.6f} segundos")
                     return
+        stopTimer = timeit.default_timer()
+        print(f"Não encontrado (Sequencial) em {(stopTimer - startTimer):.6f} segundos") # Caso o usuário não seja enontrado ao correr pela lista toda retorna essa informação
+        return
     
     # Função responsável por calcular o tempo de busca de um usuário de forma binária
     def getUserBinary (self, search):
         startTimer = timeit.default_timer()
-        userIndex = self.hashIndex(search)
+        userIndex = self.hashIndex(search) # simula o index que a busca está procurando
         lowerPos = 0
         biggerPos = self.tableSize - 1
-        while lowerPos <= biggerPos:
+        while lowerPos <= biggerPos: # Procura pelo usuário dividindo a lista a cada busca, cada vez se aproximando mais
             middlePos = (lowerPos + biggerPos) // 2
-            if middlePos == userIndex:
-                for registeredUser in self.users[userIndex]:
-                    if registeredUser.getUsername() == search:
-                        stopTimer = timeit.default_timer()
-                        print(f"Encontrado Binary em {(stopTimer - startTimer):.6f} segundos")
-                        return
-            if middlePos > userIndex:
-                biggerPos = middlePos - 1
             if middlePos < userIndex:
                 lowerPos = middlePos + 1
-
-    # Função responsável por calcular o tempo de busca de um usuário em hash.
-    def getUserHash (self, search):
-        startTimer = timeit.default_timer()
-        i = self.hashIndex(search)
-        for registeredUser in self.users[i]:
-            if registeredUser.getUsername() == search:
+            elif middlePos > userIndex:
+                biggerPos = middlePos - 1
+            elif middlePos == userIndex:
+                for registeredUser in self.users[userIndex]: # procura sequenciamente pelo usuário apos encontrar o slot que ele está
+                    if registeredUser.getUsername() == search:
+                        stopTimer = timeit.default_timer()
+                        print(f"Encontrado (Binary) em {(stopTimer - startTimer):.6f} segundos")
+                        return
                 stopTimer = timeit.default_timer()
-                print(f"Encontrado Hash em {(stopTimer - startTimer):.6f} segundos")
+                print(f"Não encontrado (Binary) em {(stopTimer - startTimer):.6f} segundos") # Retorna o tempo que a função tomou para concluir que o usuário não existe
                 return
+
+    # Função responsável por calcular o tempo de busca de um usuário em hash.  
+    def getUserHash (self, search):
+      startTimer = timeit.default_timer()
+      i = self.hashIndex(search) # Faz o hash do username e descobre o sloth que ele se encontra em
+      for registeredUser in self.users[i]: # Procura o usuário sequencialmente dentro do slot
+          if registeredUser.getUsername() == search:
+                stopTimer = timeit.default_timer()
+                print(f"Encontrado (Hash) em {(stopTimer - startTimer):.6f} segundos")
+                return registeredUser
+      stopTimer = timeit.default_timer()
+      print(f"Não encontrado (Hash) em {(stopTimer - startTimer):.6f} segundos") # Retorna o tempo que a função tomou para concluir que o usuário não existe
+      return
 
     # Busca o usuário no sistema por hash, identica a função temporizada.
     def getUser (self, search):       
@@ -86,7 +98,8 @@ class usersTable:
         for registeredUser in self.users[i]:
             if registeredUser.getUsername() == search:
                 return registeredUser
-    
+        raise Exception("Usuário não encontrado")
+  
     # Função responsável por adicionar o usuário a lista
     def setUser (self, user):
         username = user.getUsername()
