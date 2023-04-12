@@ -42,8 +42,8 @@ def LoginRegisterFrame(master):
 
     # Returns the username and password
     def _Return(event):
-        username = usernameEntry.get()
-        password = passwordEntry.get()
+        username = hashlib.md5(usernameEntry.get().encode()).hexdigest()
+        password = hashlib.md5(passwordEntry.get().encode()).hexdigest()
         print(f"user: {username}")
         print(f"password: {password}")
     passwordEntry.bind("<Return>", _Return)
