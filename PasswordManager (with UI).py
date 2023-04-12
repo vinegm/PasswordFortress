@@ -2,6 +2,18 @@ from tkinter import *
 import hashlib
 import pickle
 
+def CheckForExistingUser(Username):
+    raise Exception("Code Missing!")
+    pass
+
+def RegisterUser(username, password):
+    raise Exception("Code Missing!")
+    pass
+
+def Login(username, password):
+    raise Exception("Code Missing!")
+    pass
+
 def LoginRegisterFrame(master):
     LoginRegisterFrame = Frame(master)
     LoginRegisterFrame.pack(anchor="center")
@@ -22,11 +34,13 @@ def LoginRegisterFrame(master):
     passwordEntry = Entry(LoginRegisterFrame)
     passwordEntry.grid(row=1, column=1)
 
+    # Set focus to the username entry and then to the password entry
     usernameEntry.focus_set()
     def _FocusPasswordEntry(event):
         passwordEntry.focus_set()
     usernameEntry.bind("<Return>", _FocusPasswordEntry)
 
+    # Returns the username and password
     def _Return(event):
         username = usernameEntry.get()
         password = passwordEntry.get()
