@@ -15,13 +15,15 @@ class userInfo:
         return self.username
 
 def UserExists(search):
+    userLine = 0
     try:
         with open("SavedUsers.users", "rb") as file:
-            for line in (editUser := file.readlines()):
+            for line in file.readlines():
                 serializedUser = line.rstrip()
                 lookingForUser = pickle.loads(serializedUser)
                 if lookingForUser.username == search:
-                    return True
+                    return lookingForUser
+                userLine += 1
         return False
     except FileNotFoundError:
         return False
@@ -55,7 +57,9 @@ class LoginFrame (Frame):
         head = Label(self,
                      text = "Welcome to a Password Manager!",
                      font = ("Arial", 12, "bold"))
-        head.grid(row = 0,
+        head.grid(pady = 20,
+                  padx = 10,
+                  row = 0,
                   column = 0, columnspan = 2,
                   sticky="nsew")
 
@@ -63,122 +67,148 @@ class LoginFrame (Frame):
         usernameLabel = Label(self,
                               text = "Username:",
                               font = ("Arial", 9, "bold"))
-        usernameLabel.grid(pady = 15,
+        usernameLabel.grid(pady = 5,
                            row = 1,
-                           column = 0)
+                           column = 0,
+                           sticky = "e")
 
         usernameEntry = Entry(self)
-        usernameEntry.grid(pady = 15,
+        usernameEntry.grid(pady = 5,
                            row = 1,
-                           column = 1)
+                           column = 1,
+                           sticky = "w")
         usernameEntry.bind("<Return>", lambda event: passwordEntry.focus_set())
 
         # Password label and entry
         passwordLabel = Label(self,
                               text = "Password:",
                               font = ("Arial", 9, "bold"))
-        passwordLabel.grid(row = 2,
-                        column = 0)
+        passwordLabel.grid(pady = 5,
+                           row = 2,
+                           column = 0,
+                           sticky = "e")
 
-        passwordEntry = Entry(self)
-        passwordEntry.grid(row = 2,
-                           column = 1)
+        passwordEntry = Entry(self, show = "*")
+        passwordEntry.grid(pady = 5,
+                           row = 2,
+                           column = 1,
+                           sticky = "w")
 
         RegisterLabel = Label(self,
                               text = "Register",
-                              font = ("Arial", 9, "bold", "underline"),
+                              font = ("Arial", 7, "bold", "underline"),
                               fg = "Blue")
         RegisterLabel.bind("<Button-1>", lambda event: controller.ChangeFrame("RegisterFrame"))
         RegisterLabel.grid(pady = 5,
                            row = 3,
-                           column= 0,
-                           sticky = "w")
+                           column= 0)
+                           #sticky = "ew")
 
         def _LoginUser(*event):
-            username = hashlib.md5(usernameEntry.get().encode()).hexdigest()
-            password = hashlib.md5(passwordEntry.get().encode()).hexdigest()
-            print(f"user: {username}")
-            print(f"password: {password}")
+            if (user := UserExists(username := hashlib.md5(usernameEntry.get().encode()).hexdigest())) == False:
+                pass
+            elif (password := hashlib.md5(passwordEntry.get().encode()).hexdigest()) != user.password:
+                pass
+            else:
+                print("logado")
             
-            controller.ChangeFrame("ProfileFrame")
+            #controller.ChangeFrame("ProfileFrame")
 
         passwordEntry.bind("<Return>", _LoginUser)
         LoginButton = Button(self,
-                                text = "Login",
-                                command = _LoginUser)
-        LoginButton.grid(row = 5,
-                            column = 0, columnspan = 2,
-                            sticky= "ns")
+                             text = "Login",
+                             command = _LoginUser)
+        LoginButton.grid(pady = 10,
+                         row = 3,
+                         column = 0, columnspan = 2,
+                         sticky= "ns")
 class RegisterFrame (Frame):
     def __init__(self, master, controller):
         Frame.__init__(self, master)
-        
         head = Label(self,
                      text = "Create Your Own Profile!",
                      font = ("Arial", 12, "bold"))
-        head.grid(row = 0,
+        head.grid(pady = 20,
+                  padx = 10,
+                  row = 0,
                   column = 0, columnspan = 2,
                   sticky="nsew")
 
         nicknameLabel = Label(self,
                               text = "Nickname:",
                               font = ("Arial", 9, "bold"))
-        nicknameLabel.grid(row = 1,
-                       column = 0)
+        nicknameLabel.grid(pady = 5,
+                           row = 1,
+                           column = 0)
         
         nicknameEntry = Entry(self)
-        nicknameEntry.grid(row = 1,
-                       column = 1)
+        nicknameEntry.grid(pady = 5,
+                           row = 1,
+                           column = 1)
         nicknameEntry.bind("<Return>", lambda event: usernameEntry.focus_set())
 
         usernameLabel = Label(self,
                               text = "Username:",
                               font = ("Arial", 9, "bold"))
-        usernameLabel.grid(row = 2,
+        usernameLabel.grid(pady = 5,
+                           row = 2,
                            column = 0)
         
         usernameEntry = Entry(self)
-        usernameEntry.grid(row = 2,
+        usernameEntry.grid(pady = 5,
+                           row = 2,
                            column = 1)
         usernameEntry.bind("<Return>", lambda event: passwordEntry.focus_set())
 
         passwordLabel = Label(self,
                               text = "Password:",
                               font = ("Arial", 9, "bold"))
-        passwordLabel.grid(row = 3,
+        passwordLabel.grid(pady = 5,
+                           row = 3,
                            column = 0)
         
-        passwordEntry = Entry(self)
-        passwordEntry.grid(row = 3,
+        passwordEntry = Entry(self, show = "*")
+        passwordEntry.grid(pady = 5,
+                           row = 3,
                            column = 1)
         passwordEntry.bind("<Return>", lambda event: confirmPasswordEntry.focus_set())
 
         confirmPasswordLabel = Label(self,
                                      text = "Confirm\nPassword:",
                                      font = ("Arial", 9, "bold"))
-        confirmPasswordLabel.grid(row = 4,
+        confirmPasswordLabel.grid(pady = 5,
+                                  row = 4,
                                   column = 0)
         
-        confirmPasswordEntry = Entry(self)
-        confirmPasswordEntry.grid(row = 4,
+        confirmPasswordEntry = Entry(self, show = "*")
+        confirmPasswordEntry.grid(pady = 5,
+                                  row = 4,
                                   column = 1)
         
+        warningLabel = Label(self,
+                             font = ("arial", 9, "bold"))
+
+        def _Return(*event):
+            controller.ChangeFrame("LoginFrame")
+            for selectEntry in (nicknameEntry, usernameEntry, passwordEntry, confirmPasswordEntry):
+                selectEntry.delete(0, END)
+            warningLabel.config(text = "")
+
         def _RegisterUser(*event):
-            warningLabel = Label(self,
-                                 font = ("arial", 9, "bold"))
-            warningLabel.grid(row = 6,
+            warningLabel.grid(pady = 5,
+                              row = 6,
                               column = 0, columnspan = 2,
                               sticky= "nsew")
             
             if nicknameEntry.get() == "" or usernameEntry.get() == "" or \
                passwordEntry.get() == "" or confirmPasswordEntry.get() == "":
-                warningLabel.config(text = "Preencha Todos\nos Campos!")
+                warningLabel.config(text = "Fill All\nThe Boxes!")
 
-            elif UserExists(username := hashlib.md5(usernameEntry.get().encode()).hexdigest()):
-                warningLabel.config(text = "Usuário Indisponível!")
+            elif UserExists(username := hashlib.md5(usernameEntry.get().encode()).hexdigest()) != False:
+                warningLabel.config(text = "Username Unavailable!")
 
             elif confirmPasswordEntry.get() != passwordEntry.get():
-                warningLabel.config(text = "As Senhas Não Conferem!")
+                warningLabel.config(text = "Passwords Don't Match!")
 
             else:
                 password = hashlib.md5(passwordEntry.get().encode()).hexdigest()
@@ -187,7 +217,7 @@ class RegisterFrame (Frame):
                 with open("SavedUsers.users", "ab") as file:
                     file.write(serializedUser)
                     print("usuário salvo!")
-                controller.ChangeFrame("LoginFrame")
+                _Return()
 
         confirmPasswordEntry.bind("<Return>", _RegisterUser)
         RegisterButton = Button(self,
@@ -197,10 +227,19 @@ class RegisterFrame (Frame):
                             column = 0, columnspan = 2,
                             sticky= "ns")
 
+        backLabel = Label(self,
+                          text = "Back",
+                          font = ("Arial", 7, "bold", "underline"),
+                          fg = "Blue")
+        backLabel.bind("<Button-1>", _Return)
+        backLabel.grid(row = 5,
+                       column= 0,
+                       sticky = "ew")
 
 class ProfileFrame (Frame):
     def __init__(self, master, controller):
         Frame.__init__(self, master)
+        # raise Exception("Missing Code!")
 
 
 
