@@ -1,7 +1,7 @@
 from tkinter import *
 import hashlib
 import pickle
-
+# Class responsable to hold the user information
 class userInfo:
     def __init__(self, username, password):
         self.username = username
@@ -11,9 +11,7 @@ class userInfo:
     def getAccounts (self):
         return self.accounts()
 
-    def getUsername (self):
-        return self.username
-
+# Checks if a user exists in the .users, if not, returns False, if it does it returns the line the user is in
 def UserExists(search):
     userLine = 0
     try:
@@ -25,16 +23,19 @@ def UserExists(search):
                     return lookingForUser
                 userLine += 1
         return False
+    # Returns False if the file does not exist
     except FileNotFoundError:
         return False
                 
-
+# Class responsable to loading the frames and app
 class PasswordManager (Tk):
     def __init__(self):
         Tk.__init__(self)
         
         framesHolder = Frame(self)
-        framesHolder.pack(anchor = "center", fill = "both", expand = True)
+        framesHolder.pack(anchor = "center",
+                          fill = "both",
+                          expand = True)
         framesHolder.grid_rowconfigure(0, weight = 1)
         framesHolder.grid_columnconfigure(0, weight = 1)
         
@@ -43,17 +44,23 @@ class PasswordManager (Tk):
             page_name = F.__name__
             frame = F(framesHolder, self)
             self.frames[page_name] = frame
-            frame.grid(row = 0, column = 0, sticky="nsew")
+            frame.grid(row = 0,
+                       column = 0,
+                       sticky = "nsew")
     
         self.ChangeFrame("LoginFrame")
 
+    # Function responsable for changing the frames, loading one on top of another
     def ChangeFrame(self, page_name):
         frame = self.frames[page_name]
         frame.tkraise()
 
+# Class responsable for the login screen
 class LoginFrame (Frame):
     def __init__(self, master, controller):
         Frame.__init__(self, master)
+        
+        # Header label
         head = Label(self,
                      text = "Welcome to a Password Manager!",
                      font = ("Arial", 12, "bold"))
@@ -77,6 +84,8 @@ class LoginFrame (Frame):
                            row = 1,
                            column = 1,
                            sticky = "w")
+        
+        # Bind to set focus on the password entry once username is entered
         usernameEntry.bind("<Return>", lambda event: passwordEntry.focus_set())
 
         # Password label and entry
@@ -94,6 +103,7 @@ class LoginFrame (Frame):
                            column = 1,
                            sticky = "w")
 
+        # Register label and entry, responsable for sending the user to a register screen if needed
         RegisterLabel = Label(self,
                               text = "Register",
                               font = ("Arial", 7, "bold", "underline"),
@@ -104,16 +114,24 @@ class LoginFrame (Frame):
                            column= 0)
                            #sticky = "ew")
 
+        # Function responsable for checking if the user and password are registered in the system and login
         def _LoginUser(*event):
-            if (user := UserExists(username := hashlib.md5(usernameEntry.get().encode()).hexdigest())) == False:
-                pass
+            warningLabel = Label(self,
+                                 font = ("arial", 9, "bold"))
+            warningLabel.grid(pady = 5,
+                              row = 4,
+                              column = 0, columnspan = 2,
+                              sticky= "nsew")
+            if (user := UserExists(hashlib.md5(usernameEntry.get().encode()).hexdigest())) == False:
+                warningLabel.config(text = "Username/Password Incorrect!")
             elif (password := hashlib.md5(passwordEntry.get().encode()).hexdigest()) != user.password:
-                pass
+                warningLabel.config(text = "Username/Password Incorrect!")
             else:
-                print("logado")
-            
-            #controller.ChangeFrame("ProfileFrame")
-
+                controller.ChangeFrame("ProfileFrame")
+                for selectEntry in (usernameEntry, passwordEntry):
+                    selectEntry.delete(0, END)
+                warningLabel.config(text = "")
+        # Button and bind responsable for calling the login function
         passwordEntry.bind("<Return>", _LoginUser)
         LoginButton = Button(self,
                              text = "Login",
@@ -216,7 +234,6 @@ class RegisterFrame (Frame):
                 serializedUser = pickle.dumps(user) + b"\n"
                 with open("SavedUsers.users", "ab") as file:
                     file.write(serializedUser)
-                    print("usuário salvo!")
                 _Return()
 
         confirmPasswordEntry.bind("<Return>", _RegisterUser)
