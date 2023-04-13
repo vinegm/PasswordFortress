@@ -15,13 +15,16 @@ class userInfo:
         return self.username
 
 def UserExists(search):
-    with open("SavedUsers.users", "rb") as file:
-        for line in (editUser := file.readlines()):
-            serializedUser = line.rstrip()
-            lookingForUser = pickle.loads(serializedUser)
-            if lookingForUser.username == search:
-                return True
-    return False
+    try:
+        with open("SavedUsers.users", "rb") as file:
+            for line in (editUser := file.readlines()):
+                serializedUser = line.rstrip()
+                lookingForUser = pickle.loads(serializedUser)
+                if lookingForUser.username == search:
+                    return True
+        return False
+    except FileNotFoundError:
+        return False
                 
 
 class PasswordManager (Tk):
@@ -81,24 +84,31 @@ class LoginFrame (Frame):
         passwordEntry.grid(row = 2,
                            column = 1)
 
-        notRegistered = Label(self,
+        RegisterLabel = Label(self,
                               text = "Register",
                               font = ("Arial", 9, "bold", "underline"),
                               fg = "Blue")
-        notRegistered.bind("<Button-1>", lambda event: controller.ChangeFrame("RegisterFrame"))
-        notRegistered.grid(pady = 5,
+        RegisterLabel.bind("<Button-1>", lambda event: controller.ChangeFrame("RegisterFrame"))
+        RegisterLabel.grid(pady = 5,
                            row = 3,
                            column= 0,
                            sticky = "w")
 
-        def _LoginUser(event):
+        def _LoginUser(*event):
             username = hashlib.md5(usernameEntry.get().encode()).hexdigest()
             password = hashlib.md5(passwordEntry.get().encode()).hexdigest()
             print(f"user: {username}")
             print(f"password: {password}")
             
-            controller.ChangeFrame("ProfileFrame")    
+            controller.ChangeFrame("ProfileFrame")
+
         passwordEntry.bind("<Return>", _LoginUser)
+        LoginButton = Button(self,
+                                text = "Login",
+                                command = _LoginUser)
+        LoginButton.grid(row = 5,
+                            column = 0, columnspan = 2,
+                            sticky= "ns")
 class RegisterFrame (Frame):
     def __init__(self, master, controller):
         Frame.__init__(self, master)
@@ -153,21 +163,35 @@ class RegisterFrame (Frame):
         confirmPasswordEntry.grid(row = 4,
                                   column = 1)
         
-        def _RegisterUser(event):
-            username = hashlib.md5(usernameEntry.get().encode()).hexdigest()
-            password = hashlib.md5(passwordEntry.get().encode()).hexdigest()
-            if UserExists(username):
-                print("toma no cu")
-            elif hashlib.md5(confirmPasswordEntry.get().encode()).hexdigest() != password:
-                print("toma no cu²")
+        def _RegisterUser(*event):
+            warningLabel = Label(self,
+                                 font = ("arial", 9, "bold"))
+            warningLabel.grid(row = 6,
+                              column = 0, columnspan = 2,
+                              sticky= "nsew")
+            if nicknameEntry.get() == "" or usernameEntry.get() == "" or \
+               passwordEntry.get() == "" or confirmPasswordEntry.get() == "":
+                warningLabel.config(text = "Preencha Todos\nos Campos!")
+            elif UserExists(username := hashlib.md5(usernameEntry.get().encode()).hexdigest()):
+                warningLabel.config(text = "Usuário Indisponível!")
+            elif confirmPasswordEntry.get() != passwordEntry.get():
+                warningLabel.config(text = "As Senhas Não Conferem!")
             else:
+                password = hashlib.md5(passwordEntry.get().encode()).hexdigest()
                 user = userInfo(username, password)
                 serializedUser = pickle.dumps(user) + b"\n"
                 with open("SavedUsers.users", "ab") as file:
                     file.write(serializedUser)
                     print("usuário salvo!")
                 controller.ChangeFrame("LoginFrame")
+
         confirmPasswordEntry.bind("<Return>", _RegisterUser)
+        RegisterButton = Button(self,
+                                text = "Register",
+                                command = _RegisterUser)
+        RegisterButton.grid(row = 5,
+                            column = 0, columnspan = 2,
+                            sticky= "ns")
 
 
 class ProfileFrame (Frame):
