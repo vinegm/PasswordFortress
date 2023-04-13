@@ -7,16 +7,16 @@ class PasswordManager (Tk):
         Tk.__init__(self)
         
         framesHolder = Frame(self)
-        framesHolder.pack(side="top", fill="both", expand=True)
-        framesHolder.grid_rowconfigure(0, weight=1)
-        framesHolder.grid_columnconfigure(0, weight=1)
+        framesHolder.pack(anchor = "center", fill = "both", expand = True)
+        framesHolder.grid_rowconfigure(0, weight = 1)
+        framesHolder.grid_columnconfigure(0, weight = 1)
         
         self.frames = {}
         for F in (LoginFrame, RegisterFrame, ProfileFrame):
             page_name = F.__name__
             frame = F(framesHolder, self)
             self.frames[page_name] = frame
-            frame.grid(row=0, column=0, sticky="nsew")
+            frame.grid(row = 0, column = 0, sticky="nsew")
     
         self.ChangeFrame("LoginFrame")
 
@@ -68,9 +68,7 @@ class LoginFrame (Frame):
                            column= 0,
                            sticky = "w")
         
-        def _FocusPasswordEntry(event):
-            passwordEntry.focus_set()
-        usernameEntry.bind("<Return>", _FocusPasswordEntry)
+        usernameEntry.bind("<Return>", lambda event: passwordEntry.focus_set())
         def _LoginUser(event):
             username = hashlib.md5(usernameEntry.get().encode()).hexdigest()
             password = hashlib.md5(passwordEntry.get().encode()).hexdigest()
@@ -82,10 +80,61 @@ class LoginFrame (Frame):
 class RegisterFrame (Frame):
     def __init__(self, master, controller):
         Frame.__init__(self, master)
+        
+        head = Label(self,
+                     text = "Create Your Own Profile!",
+                     font = ("Arial", 12, "bold"))
+        head.grid(row = 0,
+                  column = 0, columnspan = 2,
+                  sticky="nsew")
+
+        userLabel = Label(self,
+                              text = "User:",
+                              font = ("Arial", 9, "bold"))
+        userLabel.grid(row = 1,
+                       column = 0)
+        
+        userEntry = Entry(self)
+        userEntry.grid(row = 1,
+                       column = 1)
+
+
+        usernameLabel = Label(self,
+                              text = "Username:",
+                              font = ("Arial", 9, "bold"))
+        usernameLabel.grid(row = 2,
+                           column = 0)
+        
+        usernameEntry = Entry(self)
+        usernameEntry.grid(row = 2,
+                           column = 1)
+
+        passwordLabel = Label(self,
+                              text = "Password:",
+                              font = ("Arial", 9, "bold"))
+        passwordLabel.grid(row = 3,
+                           column = 0)
+        
+        passwordEntry = Entry(self)
+        passwordEntry.grid(row = 3,
+                           column = 1)
+        
+        confirmPasswordLabel = Label(self,
+                                     text = "Confirm\nPassword:",
+                                     font = ("Arial", 9, "bold"))
+        confirmPasswordLabel.grid(row = 4,
+                                  column = 0)
+        
+        confirmPasswordEntry = Entry(self)
+        confirmPasswordEntry.grid(row = 4,
+                                  column = 1)
+
 
 class ProfileFrame (Frame):
     def __init__(self, master, controller):
         Frame.__init__(self, master)
+
+
 
 if __name__ == '__main__':
     window = PasswordManager()
