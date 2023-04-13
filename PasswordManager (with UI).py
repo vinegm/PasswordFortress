@@ -169,13 +169,17 @@ class RegisterFrame (Frame):
             warningLabel.grid(row = 6,
                               column = 0, columnspan = 2,
                               sticky= "nsew")
+            
             if nicknameEntry.get() == "" or usernameEntry.get() == "" or \
                passwordEntry.get() == "" or confirmPasswordEntry.get() == "":
                 warningLabel.config(text = "Preencha Todos\nos Campos!")
+
             elif UserExists(username := hashlib.md5(usernameEntry.get().encode()).hexdigest()):
                 warningLabel.config(text = "Usuário Indisponível!")
+
             elif confirmPasswordEntry.get() != passwordEntry.get():
                 warningLabel.config(text = "As Senhas Não Conferem!")
+
             else:
                 password = hashlib.md5(passwordEntry.get().encode()).hexdigest()
                 user = userInfo(username, password)
