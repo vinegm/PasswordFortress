@@ -2,6 +2,28 @@ from tkinter import *
 import hashlib
 import pickle
 
+class userInfo:
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+        self.accounts = dict()
+
+    def getAccounts (self):
+        return self.accounts()
+
+    def getUsername (self):
+        return self.username
+
+def UserExists(search):
+    with open("SavedUsers.users", "rb") as file:
+        for line in (editUser := file.readlines()):
+            serializedUser = line.rstrip()
+            lookingForUser = pickle.loads(serializedUser)
+            if lookingForUser.username == search:
+                return True
+    return False
+                
+
 class PasswordManager (Tk):
     def __init__(self):
         Tk.__init__(self)
@@ -46,6 +68,7 @@ class LoginFrame (Frame):
         usernameEntry.grid(pady = 15,
                            row = 1,
                            column = 1)
+        usernameEntry.bind("<Return>", lambda event: passwordEntry.focus_set())
 
         # Password label and entry
         passwordLabel = Label(self,
@@ -57,7 +80,7 @@ class LoginFrame (Frame):
         passwordEntry = Entry(self)
         passwordEntry.grid(row = 2,
                            column = 1)
-        
+
         notRegistered = Label(self,
                               text = "Register",
                               font = ("Arial", 9, "bold", "underline"),
@@ -67,16 +90,15 @@ class LoginFrame (Frame):
                            row = 3,
                            column= 0,
                            sticky = "w")
-        
-        usernameEntry.bind("<Return>", lambda event: passwordEntry.focus_set())
+
         def _LoginUser(event):
             username = hashlib.md5(usernameEntry.get().encode()).hexdigest()
             password = hashlib.md5(passwordEntry.get().encode()).hexdigest()
             print(f"user: {username}")
             print(f"password: {password}")
             
-            controller.ChangeFrame("ProfileFrame")
-        passwordEntry.bind("<Return>", _LoginUser)        
+            controller.ChangeFrame("ProfileFrame")    
+        passwordEntry.bind("<Return>", _LoginUser)
 class RegisterFrame (Frame):
     def __init__(self, master, controller):
         Frame.__init__(self, master)
@@ -88,16 +110,16 @@ class RegisterFrame (Frame):
                   column = 0, columnspan = 2,
                   sticky="nsew")
 
-        userLabel = Label(self,
-                              text = "User:",
+        nicknameLabel = Label(self,
+                              text = "Nickname:",
                               font = ("Arial", 9, "bold"))
-        userLabel.grid(row = 1,
+        nicknameLabel.grid(row = 1,
                        column = 0)
         
-        userEntry = Entry(self)
-        userEntry.grid(row = 1,
+        nicknameEntry = Entry(self)
+        nicknameEntry.grid(row = 1,
                        column = 1)
-
+        nicknameEntry.bind("<Return>", lambda event: usernameEntry.focus_set())
 
         usernameLabel = Label(self,
                               text = "Username:",
@@ -108,6 +130,7 @@ class RegisterFrame (Frame):
         usernameEntry = Entry(self)
         usernameEntry.grid(row = 2,
                            column = 1)
+        usernameEntry.bind("<Return>", lambda event: passwordEntry.focus_set())
 
         passwordLabel = Label(self,
                               text = "Password:",
@@ -118,7 +141,8 @@ class RegisterFrame (Frame):
         passwordEntry = Entry(self)
         passwordEntry.grid(row = 3,
                            column = 1)
-        
+        passwordEntry.bind("<Return>", lambda event: confirmPasswordEntry.focus_set())
+
         confirmPasswordLabel = Label(self,
                                      text = "Confirm\nPassword:",
                                      font = ("Arial", 9, "bold"))
@@ -128,6 +152,22 @@ class RegisterFrame (Frame):
         confirmPasswordEntry = Entry(self)
         confirmPasswordEntry.grid(row = 4,
                                   column = 1)
+        
+        def _RegisterUser(event):
+            username = hashlib.md5(usernameEntry.get().encode()).hexdigest()
+            password = hashlib.md5(passwordEntry.get().encode()).hexdigest()
+            if UserExists(username):
+                print("toma no cu")
+            elif hashlib.md5(confirmPasswordEntry.get().encode()).hexdigest() != password:
+                print("toma no cu²")
+            else:
+                user = userInfo(username, password)
+                serializedUser = pickle.dumps(user) + b"\n"
+                with open("SavedUsers.users", "ab") as file:
+                    file.write(serializedUser)
+                    print("usuário salvo!")
+                controller.ChangeFrame("LoginFrame")
+        confirmPasswordEntry.bind("<Return>", _RegisterUser)
 
 
 class ProfileFrame (Frame):
