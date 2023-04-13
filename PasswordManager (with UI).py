@@ -59,7 +59,6 @@ class PasswordManager (Tk):
 class LoginFrame (Frame):
     def __init__(self, master, controller):
         Frame.__init__(self, master)
-        
         # Header label
         head = Label(self,
                      text = "Welcome to a Password Manager!",
@@ -124,7 +123,7 @@ class LoginFrame (Frame):
                               sticky= "nsew")
             if (user := UserExists(hashlib.md5(usernameEntry.get().encode()).hexdigest())) == False:
                 warningLabel.config(text = "Username/Password Incorrect!")
-            elif (password := hashlib.md5(passwordEntry.get().encode()).hexdigest()) != user.password:
+            elif hashlib.md5(passwordEntry.get().encode()).hexdigest() != user.password:
                 warningLabel.config(text = "Username/Password Incorrect!")
             else:
                 controller.ChangeFrame("ProfileFrame")
@@ -140,9 +139,12 @@ class LoginFrame (Frame):
                          row = 3,
                          column = 0, columnspan = 2,
                          sticky= "ns")
+
+# Class responsable for the register screen
 class RegisterFrame (Frame):
     def __init__(self, master, controller):
         Frame.__init__(self, master)
+        # Header Label
         head = Label(self,
                      text = "Create Your Own Profile!",
                      font = ("Arial", 12, "bold"))
@@ -152,6 +154,7 @@ class RegisterFrame (Frame):
                   column = 0, columnspan = 2,
                   sticky="nsew")
 
+        # Nickname label and entry
         nicknameLabel = Label(self,
                               text = "Nickname:",
                               font = ("Arial", 9, "bold"))
@@ -163,8 +166,11 @@ class RegisterFrame (Frame):
         nicknameEntry.grid(pady = 5,
                            row = 1,
                            column = 1)
+        
+        # Set focus to next box
         nicknameEntry.bind("<Return>", lambda event: usernameEntry.focus_set())
 
+        # Username label and entry
         usernameLabel = Label(self,
                               text = "Username:",
                               font = ("Arial", 9, "bold"))
@@ -178,6 +184,7 @@ class RegisterFrame (Frame):
                            column = 1)
         usernameEntry.bind("<Return>", lambda event: passwordEntry.focus_set())
 
+        # Password label and entry
         passwordLabel = Label(self,
                               text = "Password:",
                               font = ("Arial", 9, "bold"))
@@ -185,12 +192,13 @@ class RegisterFrame (Frame):
                            row = 3,
                            column = 0)
         
-        passwordEntry = Entry(self, show = "*")
+        passwordEntry = Entry(self, show = "*") # Password box only shows * insted of the password
         passwordEntry.grid(pady = 5,
                            row = 3,
                            column = 1)
         passwordEntry.bind("<Return>", lambda event: confirmPasswordEntry.focus_set())
 
+        # Password Confirmation label and entry
         confirmPasswordLabel = Label(self,
                                      text = "Confirm\nPassword:",
                                      font = ("Arial", 9, "bold"))
@@ -198,36 +206,43 @@ class RegisterFrame (Frame):
                                   row = 4,
                                   column = 0)
         
-        confirmPasswordEntry = Entry(self, show = "*")
+        confirmPasswordEntry = Entry(self, show = "*") # Password confirmation box only shows *
         confirmPasswordEntry.grid(pady = 5,
                                   row = 4,
                                   column = 1)
         
+        # Pre loads the warning label
         warningLabel = Label(self,
                              font = ("arial", 9, "bold"))
 
+        # Returns to the login screen and clears all the entrys in the register screen
         def _Return(*event):
             controller.ChangeFrame("LoginFrame")
             for selectEntry in (nicknameEntry, usernameEntry, passwordEntry, confirmPasswordEntry):
                 selectEntry.delete(0, END)
             warningLabel.config(text = "")
 
+        # Registers the user
         def _RegisterUser(*event):
             warningLabel.grid(pady = 5,
                               row = 6,
                               column = 0, columnspan = 2,
                               sticky= "nsew")
             
+            # If a box is left empty
             if nicknameEntry.get() == "" or usernameEntry.get() == "" or \
                passwordEntry.get() == "" or confirmPasswordEntry.get() == "":
                 warningLabel.config(text = "Fill All\nThe Boxes!")
 
+            # If a username is already in use
             elif UserExists(username := hashlib.md5(usernameEntry.get().encode()).hexdigest()) != False:
                 warningLabel.config(text = "Username Unavailable!")
 
+            # If password and the password confirmation dont match
             elif confirmPasswordEntry.get() != passwordEntry.get():
                 warningLabel.config(text = "Passwords Don't Match!")
 
+            # Registers the user if everything is ok
             else:
                 password = hashlib.md5(passwordEntry.get().encode()).hexdigest()
                 user = userInfo(username, password)
@@ -236,6 +251,7 @@ class RegisterFrame (Frame):
                     file.write(serializedUser)
                 _Return()
 
+        # Button and bind responsable for calling the register function
         confirmPasswordEntry.bind("<Return>", _RegisterUser)
         RegisterButton = Button(self,
                                 text = "Register",
@@ -244,6 +260,7 @@ class RegisterFrame (Frame):
                             column = 0, columnspan = 2,
                             sticky= "ns")
 
+        # Goes back to the login screen without registering the user
         backLabel = Label(self,
                           text = "Back",
                           font = ("Arial", 7, "bold", "underline"),
