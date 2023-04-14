@@ -1,13 +1,15 @@
 from tkinter import *
 import hashlib
 import pickle
+
 # Class responsable to hold the user information
 class UserInfo():
     def __init__(self, nickname, username, password):
         self.nickname = nickname
         self.username = username
         self.password = password
-        self.accounts = dict()
+        self.accounts = dict() # Plataforma: login, senha 
+
 
     def getAccounts (self):
         return self.accounts()
@@ -247,8 +249,7 @@ class RegisterFrame(Frame):
         # Registers the user
         def _registerUser(*event):
             # If a box is left empty
-            if nicknameEntry.get() == "" or usernameEntry.get() == "" or \
-               passwordEntry.get() == "" or confirmPasswordEntry.get() == "":
+            if nicknameEntry.get() == "" or usernameEntry.get() == "" or passwordEntry.get() == "":
                 head.config(text = "Fill All The Boxes!")
 
             # If a username is already in use
@@ -292,10 +293,10 @@ class RegisterFrame(Frame):
 class ProfileFrame(Frame):
     def __init__(self, master, controller):
         Frame.__init__(self, master)
-        #print(user.username)
+        header = Label(self,
+                       )
 
 
 if __name__ == '__main__':
     window = PasswordManager()
-    window.resizable(False, False)
     window.mainloop()
