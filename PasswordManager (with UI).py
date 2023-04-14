@@ -3,7 +3,8 @@ import hashlib
 import pickle
 # Class responsable to hold the user information
 class UserInfo():
-    def __init__(self, username, password):
+    def __init__(self, nickname, username, password):
+        self.nickname = nickname
         self.username = username
         self.password = password
         self.accounts = dict()
@@ -260,8 +261,9 @@ class RegisterFrame(Frame):
 
             # Registers the user if everything is ok
             else:
+                nickname = nicknameEntry.get()
                 password = hashlib.md5(passwordEntry.get().encode()).hexdigest()
-                user = UserInfo(username, password)
+                user = UserInfo(nickname, username, password)
                 serializedUser = pickle.dumps(user) + b"\n"
                 with open("SavedUsers.users", "ab") as file:
                     file.write(serializedUser)
