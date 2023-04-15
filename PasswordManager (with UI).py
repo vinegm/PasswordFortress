@@ -1,37 +1,20 @@
 from tkinter import *
+import sqlite3
 import hashlib
-import pickle
 
-# Class responsable to hold the user information
-class UserInfo():
-    def __init__(self, nickname, username, password):
-        self.nickname = nickname
-        self.username = username
-        self.password = password
-        self.accounts = dict() # Plataforma: login, senha 
-
-
-    def getAccounts (self):
-        return self.accounts()
-
-
-# Checks if a user exists in the .users, if not, returns False, if it does it returns the line the user is in
+# Checks if user exists in the database, if not, returns false, if the user exists returns the hashed password
 def userExists(search):
-    userLine = 0
-    try:
-        with open("SavedUsers.users", "rb") as file:
-            for line in file.readlines():
-                serializedUser = line.rstrip()
-                lookingForUser = pickle.loads(serializedUser)
-                if lookingForUser.username == search:
-                    return lookingForUser
-                userLine += 1
+    cursor.execute("SELECT password FROM users WHERE username = ?", (search,))
+    result = cursor.fetchone()
+    if result == None:
         return False
-    # Returns False if the file does not exist
-    except FileNotFoundError:
-        return False
+    return result[0]
 
-          
+# Hashed the info given to it, used to simplify code
+def hashInfo(info):
+    return hashlib.md5(info.encode()).hexdigest()
+
+
 # Class responsable to loading the frames and app
 class PasswordManager(Tk):
     def __init__(self):
@@ -138,10 +121,10 @@ class LoginFrame(Frame):
 
         # Function responsable for checking if the user and password are registered in the system and login
         def _loginUser (*event):
-            if (user := userExists(hashlib.md5(usernameEntry.get().encode()).hexdigest())) == False:
+            if (password := userExists(hashInfo(usernameEntry.get()))) == False:
                 head.config(text = "Username/Password Incorrect!")
 
-            elif hashlib.md5(passwordEntry.get().encode()).hexdigest() != user.password:
+            elif hashInfo(passwordEntry.get()) != password:
                 head.config(text = "Username/Password Incorrect!")
                 
             else:
@@ -253,7 +236,7 @@ class RegisterFrame(Frame):
                 head.config(text = "Fill All The Boxes!")
 
             # If a username is already in use
-            elif userExists(username := hashlib.md5(usernameEntry.get().encode()).hexdigest()) != False:
+            elif userExists(username := hashInfo(usernameEntry.get())) != False:
                 head.config(text = "Username Unavailable!")
 
             # If password and the password confirmation dont match
@@ -263,11 +246,9 @@ class RegisterFrame(Frame):
             # Registers the user if everything is ok
             else:
                 nickname = nicknameEntry.get()
-                password = hashlib.md5(passwordEntry.get().encode()).hexdigest()
-                user = UserInfo(nickname, username, password)
-                serializedUser = pickle.dumps(user) + b"\n"
-                with open("SavedUsers.users", "ab") as file:
-                    file.write(serializedUser)
+                password = hashInfo(passwordEntry.get())
+                cursor.execute("INSERT INTO users VALUES (?, ?, ?)", (nickname, username, password))
+                connection.commit()
                 _return()
 
         # Button and bind responsable for calling the register function
@@ -299,4 +280,17 @@ class ProfileFrame(Frame):
 
 if __name__ == '__main__':
     window = PasswordManager()
+    connection = sqlite3.connect("UsersInfo.db")    
+    cursor = connection.cursor()
+
+    # Checks if the tables exist in the data base, if they dont, create them
+    cursor.execute("SELECT count(*) FROM sqlite_master WHERE type='table'")
+    result = cursor.fetchone()
+    if result[0] == 0:
+        cursor.execute("CREATE TABLE users (Nickname VARCHAR, Username VARCHAR UNIQUE, Password VARCHAR)")
+        connection.commit()
+    else:
+        pass
+
     window.mainloop()
+    connection.close()
