@@ -1,7 +1,7 @@
 # PasswordManager
  
- O projeto procura ser capaz de registrar múltiplos usuários e salvar suas informações de login das suas contas como email e redes sociais localmente de forma segura e facilmente navegável por meio de ui para simplificação do uso e embelezamento do produto.
+ The project looks towards making a desktop executable able to safely manage and store the login from multiple users in a SQL data base and python with tkinter for a interative UI for simplicity.
 <h2> To Do List: </h2>
-<li> Criptografia das contas salvas. </li>
-<li> Finalizar o frame do perfil do usuário. </li>
-<li> Tornar o arquivo do .py em um executável. </li>
+<li> Learn criptography. </li>
+<li> Finish the ProfileFrame. </li>
+<li> Turn the project in a .exe. </li>
