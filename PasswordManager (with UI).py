@@ -1,4 +1,5 @@
-from tkinter import *
+import tkinter as tk
+from tkinter import ttk
 import sqlite3
 import hashlib
 
@@ -10,25 +11,26 @@ def userExists(search):
         return False
     return result[0]
 
+
 # Hashed the info given to it, used to simplify code
 def hashInfo(info):
     return hashlib.md5(info.encode()).hexdigest()
 
 
 # Class responsable to loading the frames and app
-class PasswordManager(Tk):
+class PasswordManager(tk.Tk):
     def __init__(self):
-        Tk.__init__(self)
+        tk.Tk.__init__(self)
 
         self.title("Password Manager")
         self.geometry("300x250")
         self.eval("tk::PlaceWindow . center")
         
-        framesHolder = Frame(self)
+        framesHolder = tk.Frame(self)
         framesHolder.pack(anchor = "center")
         
         self.frames = {}
-        for F in (LoginFrame, RegisterFrame, ProfileFrame):
+        for F in (LoginFrame, RegisterFrame): #, ProfileFrame):
             page_name = F.__name__
             frame = F(framesHolder, self)
             self.frames[page_name] = frame
@@ -45,23 +47,28 @@ class PasswordManager(Tk):
         if nextFrame == "LoginFrame":
             self.resizable(True,True)
             self.geometry("300x175")
+
         elif nextFrame == "RegisterFrame":
             self.resizable(True,True)
             self.geometry("300x240")
+
         else:
             self.resizable(True,True)
             self.geometry("700x700")
+
         self.resizable(False, False)
 
 
+
 # Class responsable for the login screen
-class LoginFrame(Frame):
+class LoginFrame(tk.Frame):
     def __init__(self, master, controller):
-        Frame.__init__(self, master)
+        tk.Frame.__init__(self, master)
         self.columnconfigure(0, minsize=100)
         self.columnconfigure(1, minsize=200)
         # Header label
-        head = Label(self,
+        
+        head = tk.Label(self,
                      text = "Welcome to a Password Manager!",
                      font = ("Arial", 12, "bold"))
         head.grid(pady = 20,
@@ -71,7 +78,7 @@ class LoginFrame(Frame):
                   sticky="nsew")
 
         # Username label and entry
-        usernameLabel = Label(self,
+        usernameLabel = tk.Label(self,
                               text = "Username:",
                               font = ("Arial", 9, "bold"))
         usernameLabel.grid(pady = 5,
@@ -79,7 +86,7 @@ class LoginFrame(Frame):
                            column = 0,
                            sticky = "e")
 
-        usernameEntry = Entry(self)
+        usernameEntry = tk.Entry(self)
         usernameEntry.grid(pady = 5,
                            row = 1,
                            column = 1,
@@ -89,7 +96,7 @@ class LoginFrame(Frame):
         usernameEntry.bind("<Return>", lambda event: passwordEntry.focus_set())
 
         # Password label and entry
-        passwordLabel = Label(self,
+        passwordLabel = tk.Label(self,
                               text = "Password:",
                               font = ("Arial", 9, "bold"))
         passwordLabel.grid(pady = 5,
@@ -97,7 +104,7 @@ class LoginFrame(Frame):
                            column = 0,
                            sticky = "e")
 
-        passwordEntry = Entry(self, show = "*")
+        passwordEntry = tk.Entry(self, show = "*")
         passwordEntry.grid(pady = 5,
                            row = 2,
                            column = 1,
@@ -105,12 +112,12 @@ class LoginFrame(Frame):
 
         def _changeAndClearFrame(nextFrame):
             for selectEntry in (usernameEntry, passwordEntry):
-                selectEntry.delete(0, END)
+                selectEntry.delete(0, tk.END)
             head.config(text = "Welcome to a Password Manager!")
             controller.changeFrame(nextFrame)
 
         # Register label and entry, responsable for sending the user to a register screen if needed
-        RegisterLabel = Label(self,
+        RegisterLabel = tk.Label(self,
                               text = "Register",
                               font = ("Arial", 7, "bold", "underline"),
                               fg = "Blue")
@@ -128,11 +135,17 @@ class LoginFrame(Frame):
                 head.config(text = "Username/Password Incorrect!")
                 
             else:
+                page_name = ProfileFrame.__name__
+                frame = ProfileFrame(master, controller, usernameEntry.get())
+                controller.frames[page_name] = frame
+                frame.grid(row = 0,
+                        column = 0,
+                        sticky = "nsew")
                 _changeAndClearFrame("ProfileFrame")
-
+        
         # Button and bind responsable for calling the login function
         passwordEntry.bind("<Return>", _loginUser)
-        LoginButton = Button(self,
+        LoginButton = tk.Button(self,
                              text = "Login",
                              command = _loginUser)
         LoginButton.grid(pady = 10,
@@ -142,13 +155,13 @@ class LoginFrame(Frame):
 
 
 # Class responsable for the register screen
-class RegisterFrame(Frame):
+class RegisterFrame(tk.Frame):
     def __init__(self, master, controller):
-        Frame.__init__(self, master)
+        tk.Frame.__init__(self, master)
         self.columnconfigure(0, minsize=100)
         self.columnconfigure(1, minsize=200)
         # Header Label
-        head = Label(self,
+        head = tk.Label(self,
                      text = "Register an Account!",
                      font = ("Arial", 12, "bold"))
         head.grid(pady = 20,
@@ -158,7 +171,7 @@ class RegisterFrame(Frame):
                   sticky="nsew")
         
         # Nickname label and entry
-        nicknameLabel = Label(self,
+        nicknameLabel = tk.Label(self,
                               text = "Nickname:",
                               font = ("Arial", 9, "bold"))
         nicknameLabel.grid(pady = 5,
@@ -166,7 +179,7 @@ class RegisterFrame(Frame):
                            column = 0,
                            sticky = "e")
         
-        nicknameEntry = Entry(self)
+        nicknameEntry = tk.Entry(self)
         nicknameEntry.grid(pady = 5,
                            row = 1,
                            column = 1,
@@ -176,7 +189,7 @@ class RegisterFrame(Frame):
         nicknameEntry.bind("<Return>", lambda event: usernameEntry.focus_set())
 
         # Username label and entry
-        usernameLabel = Label(self,
+        usernameLabel = tk.Label(self,
                               text = "Username:",
                               font = ("Arial", 9, "bold"))
         usernameLabel.grid(pady = 5,
@@ -184,7 +197,7 @@ class RegisterFrame(Frame):
                            column = 0,
                            sticky = "e")
         
-        usernameEntry = Entry(self)
+        usernameEntry = tk.Entry(self)
         usernameEntry.grid(pady = 5,
                            row = 2,
                            column = 1,
@@ -192,7 +205,7 @@ class RegisterFrame(Frame):
         usernameEntry.bind("<Return>", lambda event: passwordEntry.focus_set())
 
         # Password label and entry
-        passwordLabel = Label(self,
+        passwordLabel = tk.Label(self,
                               text = "Password:",
                               font = ("Arial", 9, "bold"))
         passwordLabel.grid(pady = 5,
@@ -200,7 +213,7 @@ class RegisterFrame(Frame):
                            column = 0,
                            sticky = "e")
         
-        passwordEntry = Entry(self, show = "*")  # Password box only shows * insted of the password
+        passwordEntry = tk.Entry(self, show = "*")  # Password box only shows * insted of the password
         passwordEntry.grid(pady = 5,
                            row = 3,
                            column = 1,
@@ -208,7 +221,7 @@ class RegisterFrame(Frame):
         passwordEntry.bind("<Return>", lambda event: confirmPasswordEntry.focus_set())
 
         # Password Confirmation label and entry
-        confirmPasswordLabel = Label(self,
+        confirmPasswordLabel = tk.Label(self,
                                      text = "Confirm\nPassword:",
                                      font = ("Arial", 9, "bold"))
         confirmPasswordLabel.grid(pady = 5,
@@ -216,7 +229,7 @@ class RegisterFrame(Frame):
                                   column = 0,
                                   sticky = "e")
         
-        confirmPasswordEntry = Entry(self, show = "*")  # Password confirmation box only shows *
+        confirmPasswordEntry = tk.Entry(self, show = "*")  # Password confirmation box only shows *
         confirmPasswordEntry.grid(pady = 5,
                                   row = 4,
                                   column = 1,
@@ -226,7 +239,7 @@ class RegisterFrame(Frame):
         def _return(*event):
             controller.changeFrame("LoginFrame")
             for selectEntry in (nicknameEntry, usernameEntry, passwordEntry, confirmPasswordEntry):
-                selectEntry.delete(0, END)
+                selectEntry.delete(0, tk.END)
             head.config(text = "Register an Account!")
 
         # Registers the user
@@ -253,7 +266,7 @@ class RegisterFrame(Frame):
 
         # Button and bind responsable for calling the register function
         confirmPasswordEntry.bind("<Return>", _registerUser)
-        RegisterButton = Button(self,
+        RegisterButton = tk.Button(self,
                                 text = "Register",
                                 command = _registerUser)
         RegisterButton.grid(row = 5,
@@ -261,7 +274,7 @@ class RegisterFrame(Frame):
                             sticky= "ns")
 
         # Goes back to the login screen without registering the user
-        backLabel = Label(self,
+        backLabel = tk.Label(self,
                           text = "Back",
                           font = ("Arial", 7, "bold", "underline"),
                           fg = "Blue")
@@ -271,11 +284,14 @@ class RegisterFrame(Frame):
                        sticky = "ew")
 
 
-class ProfileFrame(Frame):
-    def __init__(self, master, controller):
-        Frame.__init__(self, master)
-        header = Label(self,
-                       )
+class ProfileFrame(tk.Frame):
+    def __init__(self, master, controller, username):
+        tk.Frame.__init__(self, master)
+
+        header = tk.Label(self,
+                          text = username)
+        header.pack()
+
 
 
 if __name__ == '__main__':
@@ -287,10 +303,11 @@ if __name__ == '__main__':
     cursor.execute("SELECT count(*) FROM sqlite_master WHERE type='table'")
     result = cursor.fetchone()
     if result[0] == 0:
-        cursor.execute("CREATE TABLE users (Nickname VARCHAR, Username VARCHAR UNIQUE, Password VARCHAR)")
+        cursor.execute("CREATE TABLE users (nickname VARCHAR, username VARCHAR UNIQUE, password VARCHAR)")
+        cursor.execute("CREATE TABLE accounts (plataform VARCHAR, login VARCHAR UNIQUE, password VARCHAR)")
         connection.commit()
     else:
         pass
-
+    
     window.mainloop()
     connection.close()
