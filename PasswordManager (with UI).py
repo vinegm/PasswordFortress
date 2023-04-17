@@ -12,6 +12,10 @@ def userExists(search):
     return result[0]
 
 
+def getAccounts(username):
+    pass
+
+
 # Hashed the info given to it, used to simplify code
 def hashInfo(info):
     return hashlib.md5(info.encode()).hexdigest()
@@ -66,8 +70,8 @@ class LoginFrame(tk.Frame):
         tk.Frame.__init__(self, master)
         self.columnconfigure(0, minsize=100)
         self.columnconfigure(1, minsize=200)
-        # Header label
         
+        # Header label
         head = tk.Label(self,
                      text = "Welcome to a Password Manager!",
                      font = ("Arial", 12, "bold"))
@@ -160,6 +164,7 @@ class RegisterFrame(tk.Frame):
         tk.Frame.__init__(self, master)
         self.columnconfigure(0, minsize=100)
         self.columnconfigure(1, minsize=200)
+        
         # Header Label
         head = tk.Label(self,
                      text = "Register an Account!",
@@ -288,9 +293,18 @@ class ProfileFrame(tk.Frame):
     def __init__(self, master, controller, username):
         tk.Frame.__init__(self, master)
 
+        # Header label
         header = tk.Label(self,
-                          text = username)
-        header.pack()
+                          text = username,
+                          font = ("Arial", 20, "bold"))
+        header.grid(row = 0,
+                    column = 0, columnspan = 5,
+                    sticky = "nsew")
+        
+        accounts = getAccounts()
+        for i in accounts:
+            pass
+
 
 
 
@@ -303,8 +317,18 @@ if __name__ == '__main__':
     cursor.execute("SELECT count(*) FROM sqlite_master WHERE type='table'")
     result = cursor.fetchone()
     if result[0] == 0:
-        cursor.execute("CREATE TABLE users (nickname VARCHAR, username VARCHAR UNIQUE, password VARCHAR)")
-        cursor.execute("CREATE TABLE accounts (plataform VARCHAR, login VARCHAR UNIQUE, password VARCHAR)")
+        cursor.execute("""CREATE TABLE users 
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                       nickname VARCHAR, 
+                       username VARCHAR UNIQUE, 
+                       password VARCHAR)""")
+        cursor.execute("""CREATE TABLE accounts 
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                       user_id INTEGER, 
+                       plataform VARCHAR, 
+                       login VARCHAR, 
+                       password VARCHAR, 
+                       FOREIGN KEY (user_id) REFERENCES users(id))""")
         connection.commit()
     else:
         pass
