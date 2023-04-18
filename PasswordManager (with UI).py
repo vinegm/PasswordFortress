@@ -302,14 +302,21 @@ class ProfileFrame(tk.Frame):
         header = tk.Label(self,
                           text = userInfo[1],
                           font = ("Arial", 20, "bold"))
-        header.pack()
+        header.pack(anchor = "center",
+                    fill = "x")
         
         # Logoff Label
-        logoff = tk.Label(self,
+        logoff = tk.Label(header,
                           text = "Logoff",
                           font = ("Arial", 15, "bold"),
                           fg = "red")
         logoff.pack(anchor = "nw")
+
+        def _logoff(*event):
+            self.destroy()
+            controller.changeFrame("LoginFrame")
+
+        logoff.bind("<Button-1>", _logoff)
 
         # Separator from the Username and accounts
         headerSeparator = tk.Canvas(self,
@@ -333,20 +340,22 @@ class ProfileFrame(tk.Frame):
 
         #accounts = getAccounts(userInfo[0])
         self.accounts = {}
-        accounts = [("0", "Netflix", "vinegm", "123", "0"),
-                    ("1", "Spotify", "Vinee", "098", "0"),
-                    ("2", "Discord", "Gomd", "ahaha", "0"),
-                    ("3", "Steam", "3VINi", "345", "0"),
-                    ("4", "Github", "VinGIT", "135", "0"),
-                    ("5", "Gmail", "Vini@gmail.com", "723", "0")
+        accounts = [("0", "Netflix", "vinegm", "123", None, "0"),
+                    ("1", "Spotify", "Vinee", "098", None, "0"),
+                    ("2", "Discord", "Gomd", "ahaha", None, "0"),
+                    ("3", "Steam", "3VINi", "345", None, "0"),
+                    ("4", "Github", "VinGIT", "135", None, "0"),
+                    ("5", "Gmail", "Vini@gmail.com", "723", None, "0")
                     ]
         
         for i, account in enumerate(accounts):
-            plataform, login, password = account[1:4]
+            accountId, plataform, login, password, logo = account[0:5]
             accountFrame = tk.Frame(accountsHolder)
-            accountFrame.grid(row = (i+1),
+            accountFrame.grid(row = (i),
                        column = 0, columnspan = 4,
                        sticky = "nsew")
+            
+            self.accounts[accountId] = accountFrame
 
             accountFrame.columnconfigure(0, minsize = 110)
             accountFrame.columnconfigure(1, minsize = 90)
@@ -354,7 +363,7 @@ class ProfileFrame(tk.Frame):
             accountFrame.columnconfigure(3, minsize = 100)
             
             
-            if 0 == 1:
+            if logo != None:
                 pass
             else:
                 placeHolder = Image.open("assets/Question_Mark.png")
@@ -425,6 +434,7 @@ if __name__ == '__main__':
                        plataform VARCHAR,
                        login VARCHAR,
                        password VARCHAR,
+                       logo BLOB,
                        user_id INTEGER,
                        FOREIGN KEY (user_id) REFERENCES users(id))""")
         connection.commit()
