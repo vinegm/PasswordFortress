@@ -12,8 +12,13 @@ def userExists(search):
     return result[0]
 
 
-def getAccounts(username):
-    pass
+def getAccounts(password):
+    cursor.execute("SELECT id FROM users WHERE password = ?", (password,))
+    userId = cursor.fetchone()
+    cursor.execute("SELECT * FROM accounts WHERE user_id = ?", (userId[0],))
+    accounts = cursor.fetchmany()
+    print(f"accounts = {accounts}")
+    return accounts
 
 
 # Hashed the info given to it, used to simplify code
@@ -140,7 +145,7 @@ class LoginFrame(tk.Frame):
                 
             else:
                 page_name = ProfileFrame.__name__
-                frame = ProfileFrame(master, controller, usernameEntry.get())
+                frame = ProfileFrame(master, controller, password)
                 controller.frames[page_name] = frame
                 frame.grid(row = 0,
                         column = 0,
@@ -265,7 +270,7 @@ class RegisterFrame(tk.Frame):
             else:
                 nickname = nicknameEntry.get()
                 password = hashInfo(passwordEntry.get())
-                cursor.execute("INSERT INTO users VALUES (?, ?, ?)", (nickname, username, password))
+                cursor.execute("INSERT INTO users (nickname, username, password) VALUES (?, ?, ?)", (nickname, username, password))
                 connection.commit()
                 _return()
 
@@ -290,22 +295,72 @@ class RegisterFrame(tk.Frame):
 
 
 class ProfileFrame(tk.Frame):
-    def __init__(self, master, controller, username):
+    def __init__(self, master, controller, password):
         tk.Frame.__init__(self, master)
+
+        #for i in range(5):
+        #    self.columnconfigure(i, minsize=100)
 
         # Header label
         header = tk.Label(self,
-                          text = username,
+                          text = "nickname",
                           font = ("Arial", 20, "bold"))
         header.grid(row = 0,
                     column = 0, columnspan = 5,
                     sticky = "nsew")
         
-        accounts = getAccounts()
-        for i in accounts:
-            pass
+        #accounts = getAccounts(password)
+        accounts = [("0", "netflix", "vinegm", "123", "0"), ("1", "Spotify", "Vinee", "098", "0")]
+        for i, account in enumerate(accounts):
+            plataform, login, password = account[1:4]
+            frame = tk.Frame(self)
+            frame.grid(row = (i+1),
+                       column = 0, columnspan = 4,
+                       sticky = "nsew")
+            
+            separator = tk.Canvas(frame,
+                                  width = 700,
+                                  height = 5)
+            separator.grid(row = 0,
+                           column = 0, columnspan = 5,
+                           sticky = "n")
+            separator.create_line(0, 3, 700, 3, width = 3, fill = "black")
 
+            plataformLabel = tk.Label(frame,
+                                      text = plataform)
+            plataformLabel.grid(row = 1,
+                                column = 1,
+                                sticky = "w")
+            
+            loginLabel = tk.Label(frame,
+                                  text = login)
+            loginLabel.grid(row = 2,
+                            column = 1,
+                            sticky = "w")
+            
+            passwordLabel = tk.Label(frame,
+                                      text = password)
+            passwordLabel.grid(row = 3,
+                               column = 1,
+                               sticky = "w")
+            
+        separator = tk.Canvas(self,
+                              width = 700,
+                              height = 5)
+        separator.grid(row = (len(accounts)+1),
+                       column = 0, columnspan = 5,
+                       sticky = "s")
+        separator.create_line(0, 3, 700, 3, width = 3, fill = "black")
 
+        plusImame = tk.PhotoImage(file = "assets/Plus_Icon.png")
+        plusImame = plusImame.subsample(5)
+        addPlataformButton = tk.Button(self,
+                                       image = plusImame)
+                                       #bg = "black")
+        addPlataformButton.grid(row = (len(accounts)+2),
+                                column = 0, columnspan = 5,
+                                sticky = "ns")
+        addPlataformButton.image = plusImame
 
 
 if __name__ == '__main__':
@@ -317,17 +372,17 @@ if __name__ == '__main__':
     cursor.execute("SELECT count(*) FROM sqlite_master WHERE type='table'")
     result = cursor.fetchone()
     if result[0] == 0:
-        cursor.execute("""CREATE TABLE users 
-                      (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                       nickname VARCHAR, 
-                       username VARCHAR UNIQUE, 
+        cursor.execute("""CREATE TABLE users
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                       nickname VARCHAR,
+                       username VARCHAR UNIQUE,
                        password VARCHAR)""")
-        cursor.execute("""CREATE TABLE accounts 
+        cursor.execute("""CREATE TABLE accounts
                       (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                       user_id INTEGER, 
-                       plataform VARCHAR, 
-                       login VARCHAR, 
-                       password VARCHAR, 
+                       plataform VARCHAR,
+                       login VARCHAR,
+                       password VARCHAR,
+                       user_id INTEGER,
                        FOREIGN KEY (user_id) REFERENCES users(id))""")
         connection.commit()
     else:
