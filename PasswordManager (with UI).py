@@ -1,21 +1,21 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
+from PIL import Image, ImageTk
 import sqlite3
 import hashlib
 
 # Checks if user exists in the database, if not, returns false, if the user exists returns the hashed password
 def userExists(search):
-    cursor.execute("SELECT password FROM users WHERE username = ?", (search,))
+    cursor.execute("SELECT * FROM users WHERE username = ?", (search,))
     result = cursor.fetchone()
     if result == None:
         return False
-    return result[0]
+    return result
 
 
-def getAccounts(password):
-    cursor.execute("SELECT id FROM users WHERE password = ?", (password,))
-    userId = cursor.fetchone()
-    cursor.execute("SELECT * FROM accounts WHERE user_id = ?", (userId[0],))
+def getAccounts(userId):
+    cursor.execute("SELECT * FROM accounts WHERE user_id = ?", (userId,))
     accounts = cursor.fetchmany()
     print(f"accounts = {accounts}")
     return accounts
@@ -34,6 +34,7 @@ class PasswordManager(tk.Tk):
         self.title("Password Manager")
         self.geometry("300x250")
         self.eval("tk::PlaceWindow . center")
+        self.iconbitmap("assets/Key.ico")
         
         framesHolder = tk.Frame(self)
         framesHolder.pack(anchor = "center")
@@ -77,10 +78,10 @@ class LoginFrame(tk.Frame):
         self.columnconfigure(1, minsize=200)
         
         # Header label
-        head = tk.Label(self,
+        header = tk.Label(self,
                      text = "Welcome to a Password Manager!",
                      font = ("Arial", 12, "bold"))
-        head.grid(pady = 20,
+        header.grid(pady = 20,
                   padx = 10,
                   row = 0,
                   column = 0, columnspan = 2,
@@ -122,7 +123,7 @@ class LoginFrame(tk.Frame):
         def _changeAndClearFrame(nextFrame):
             for selectEntry in (usernameEntry, passwordEntry):
                 selectEntry.delete(0, tk.END)
-            head.config(text = "Welcome to a Password Manager!")
+            header.config(text = "Welcome to a Password Manager!")
             controller.changeFrame(nextFrame)
 
         # Register label and entry, responsable for sending the user to a register screen if needed
@@ -137,15 +138,15 @@ class LoginFrame(tk.Frame):
 
         # Function responsable for checking if the user and password are registered in the system and login
         def _loginUser (*event):
-            if (password := userExists(hashInfo(usernameEntry.get()))) == False:
-                head.config(text = "Username/Password Incorrect!")
+            if (userInfo := userExists(hashInfo(usernameEntry.get()))) == False:
+                header.config(text = "Username/Password Incorrect!")
 
-            elif hashInfo(passwordEntry.get()) != password:
-                head.config(text = "Username/Password Incorrect!")
+            elif hashInfo(passwordEntry.get()) != userInfo[3]:
+                header.config(text = "Username/Password Incorrect!")
                 
             else:
                 page_name = ProfileFrame.__name__
-                frame = ProfileFrame(master, controller, password)
+                frame = ProfileFrame(master, controller, userInfo)
                 controller.frames[page_name] = frame
                 frame.grid(row = 0,
                         column = 0,
@@ -295,72 +296,114 @@ class RegisterFrame(tk.Frame):
 
 
 class ProfileFrame(tk.Frame):
-    def __init__(self, master, controller, password):
+    def __init__(self, master, controller, userInfo):
         tk.Frame.__init__(self, master)
-
-        #for i in range(5):
-        #    self.columnconfigure(i, minsize=100)
-
         # Header label
         header = tk.Label(self,
-                          text = "nickname",
+                          text = userInfo[1],
                           font = ("Arial", 20, "bold"))
-        header.grid(row = 0,
-                    column = 0, columnspan = 5,
-                    sticky = "nsew")
+        header.pack()
         
-        #accounts = getAccounts(password)
-        accounts = [("0", "netflix", "vinegm", "123", "0"), ("1", "Spotify", "Vinee", "098", "0")]
+        # Logoff Label
+        logoff = tk.Label(self,
+                          text = "Logoff",
+                          font = ("Arial", 15, "bold"),
+                          fg = "red")
+        logoff.pack(anchor = "nw")
+
+        # Separator from the Username and accounts
+        headerSeparator = tk.Canvas(self,
+                                width = 700,
+                                height = 5)
+        headerSeparator.pack(anchor = "n")
+        headerSeparator.create_line(0, 3, 700, 3, width = 3, fill = "black")
+
+
+        canvas = tk.Canvas(self, width = 680, height = 630)
+        canvas.pack(side="left", fill="both")
+
+        scrollbar= ttk.Scrollbar(self, orient="vertical", command = canvas.yview)
+        scrollbar.pack(side="right",fill="y")
+
+        canvas.configure(yscrollcommand = scrollbar.set)
+
+        accountsHolder = ttk.Frame(canvas)
+        canvas.create_window((0, 0), window=accountsHolder, anchor="nw")
+
+
+        #accounts = getAccounts(userInfo[0])
+        self.accounts = {}
+        accounts = [("0", "Netflix", "vinegm", "123", "0"),
+                    ("1", "Spotify", "Vinee", "098", "0"),
+                    ("2", "Discord", "Gomd", "ahaha", "0"),
+                    ("3", "Steam", "3VINi", "345", "0"),
+                    ("4", "Github", "VinGIT", "135", "0"),
+                    ("5", "Gmail", "Vini@gmail.com", "723", "0")
+                    ]
+        
         for i, account in enumerate(accounts):
             plataform, login, password = account[1:4]
-            frame = tk.Frame(self)
-            frame.grid(row = (i+1),
+            accountFrame = tk.Frame(accountsHolder)
+            accountFrame.grid(row = (i+1),
                        column = 0, columnspan = 4,
                        sticky = "nsew")
-            
-            separator = tk.Canvas(frame,
-                                  width = 700,
-                                  height = 5)
-            separator.grid(row = 0,
-                           column = 0, columnspan = 5,
-                           sticky = "n")
-            separator.create_line(0, 3, 700, 3, width = 3, fill = "black")
 
-            plataformLabel = tk.Label(frame,
+            accountFrame.columnconfigure(0, minsize = 110)
+            accountFrame.columnconfigure(1, minsize = 90)
+            accountFrame.columnconfigure(2, minsize = 400)
+            accountFrame.columnconfigure(3, minsize = 100)
+            
+            
+            if 0 == 1:
+                pass
+            else:
+                placeHolder = Image.open("assets/Question_Mark.png")
+                placeHolder.thumbnail((100, 100))
+                placeHolder = ImageTk.PhotoImage(placeHolder)
+                plataformLogo = tk.Label(accountFrame, image = placeHolder)
+                plataformLogo.image = placeHolder
+            
+            plataformLogo.grid(row = 0, rowspan = 3,
+                               column = 0,
+                               sticky = "w")
+
+            plataformLabel = tk.Label(accountFrame,
                                       text = plataform)
-            plataformLabel.grid(row = 1,
+            plataformLabel.grid(row = 0,
                                 column = 1,
                                 sticky = "w")
             
-            loginLabel = tk.Label(frame,
+            loginLabel = tk.Label(accountFrame,
                                   text = login)
-            loginLabel.grid(row = 2,
+            loginLabel.grid(row = 1,
                             column = 1,
                             sticky = "w")
             
-            passwordLabel = tk.Label(frame,
+            passwordLabel = tk.Label(accountFrame,
                                       text = password)
-            passwordLabel.grid(row = 3,
+            passwordLabel.grid(row = 2,
                                column = 1,
                                sticky = "w")
             
-        separator = tk.Canvas(self,
-                              width = 700,
-                              height = 5)
-        separator.grid(row = (len(accounts)+1),
-                       column = 0, columnspan = 5,
-                       sticky = "s")
-        separator.create_line(0, 3, 700, 3, width = 3, fill = "black")
+            separator = tk.Canvas(accountFrame,
+                                  width = 700,
+                                  height = 5)
+            separator.grid(row = 3,
+                           column = 0, columnspan = 4,
+                           sticky = "s")
+            separator.create_line(0, 3, 700, 3, width = 3, fill = "black")
 
-        plusImame = tk.PhotoImage(file = "assets/Plus_Icon.png")
-        plusImame = plusImame.subsample(5)
-        addPlataformButton = tk.Button(self,
-                                       image = plusImame)
-                                       #bg = "black")
-        addPlataformButton.grid(row = (len(accounts)+2),
-                                column = 0, columnspan = 5,
-                                sticky = "ns")
-        addPlataformButton.image = plusImame
+        plusImage = Image.open("assets/Plus_Icon.png")
+        plusImage.thumbnail((75, 75))
+        plusImage = ImageTk.PhotoImage(plusImage)
+        addPlataformButton = tk.Button(accountsHolder,
+                                       image = plusImage)
+        addPlataformButton.grid(column = 1, columnspan = 2,
+                                sticky = "s")
+        addPlataformButton.image = plusImage
+        
+        accountsHolder.update_idletasks()
+        canvas.configure(scrollregion=canvas.bbox("all"))
 
 
 if __name__ == '__main__':
