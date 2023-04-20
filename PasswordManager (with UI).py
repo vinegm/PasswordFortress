@@ -6,18 +6,47 @@ from io import BytesIO
 import sqlite3
 import hashlib
 
+# Checks if the tables exist in the data base, if they dont, create them
+def setDatabase (connection):
+    cursor = connection.cursor()
+    cursor.execute("SELECT count(*) FROM sqlite_master WHERE type='table'")
+    result = cursor.fetchone()
+    if result[0] == 0:
+        cursor.execute("""CREATE TABLE users
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                       nickname VARCHAR,
+                       username VARCHAR UNIQUE,
+                       password VARCHAR)""")
+        cursor.execute("""CREATE TABLE accounts
+                      (id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                       plataform VARCHAR,
+                       login VARCHAR,
+                       password VARCHAR,
+                       logo BLOB,
+                       user_id INTEGER,
+                       FOREIGN KEY (user_id) REFERENCES users(id))""")
+        connection.commit()
+    
+    cursor.close()
+    return
+
+
 # Checks if user exists in the database, if not, returns false, if the user exists returns the hashed password
-def userExists(search):
+def userExists(search, connection):
+    cursor = connection.cursor()
     cursor.execute("SELECT * FROM users WHERE username = ?", (search,))
     result = cursor.fetchone()
+    cursor.close()
     if result == None:
         return False
     return result
 
 
-def getAccounts(userId):
+def getAccounts(userId, connection):
+    cursor = connection.cursor()
     cursor.execute("SELECT * FROM accounts WHERE user_id = ?", (userId,))
     accounts = cursor.fetchall()
+    cursor.close()
     return accounts
 
 
@@ -31,6 +60,9 @@ class PasswordManager(tk.Tk):
     def __init__(self):
         tk.Tk.__init__(self)
 
+        connection = sqlite3.connect("UsersInfo.db")
+        setDatabase(connection)
+
         self.title("Password Manager")
         self.geometry("300x250")
         self.eval("tk::PlaceWindow . center")
@@ -40,9 +72,9 @@ class PasswordManager(tk.Tk):
         framesHolder.pack(anchor = "center")
         
         self.frames = {}
-        for F in (LoginFrame, RegisterFrame): #, ProfileFrame):
+        for F in (LoginFrame, RegisterFrame):
             page_name = F.__name__
-            frame = F(framesHolder, self)
+            frame = F(connection, framesHolder, self)
             self.frames[page_name] = frame
             frame.grid(row = 0,
                        column = 0,
@@ -72,16 +104,16 @@ class PasswordManager(tk.Tk):
 
 # Class responsable for the login screen
 class LoginFrame(tk.Frame):
-    def __init__(self, master, controller):
+    def __init__(self, connection, master, controller):
         tk.Frame.__init__(self, master)
         self.columnconfigure(0, minsize=100)
         self.columnconfigure(1, minsize=200)
         
         # Header label
-        header = tk.Label(self,
+        self.header = tk.Label(self,
                      text = "Welcome to a Password Manager!",
                      font = ("Arial", 12, "bold"))
-        header.grid(pady = 20,
+        self.header.grid(pady = 20,
                   padx = 10,
                   row = 0,
                   column = 0, columnspan = 2,
@@ -96,14 +128,14 @@ class LoginFrame(tk.Frame):
                            column = 0,
                            sticky = "e")
 
-        usernameEntry = tk.Entry(self)
-        usernameEntry.grid(pady = 5,
+        self.usernameEntry = tk.Entry(self)
+        self.usernameEntry.grid(pady = 5,
                            row = 1,
                            column = 1,
                            sticky = "w")
         
         # Bind to set focus on the password entry once username is entered
-        usernameEntry.bind("<Return>", lambda event: passwordEntry.focus_set())
+        self.usernameEntry.bind("<Return>", lambda event: self.passwordEntry.focus_set())
 
         # Password label and entry
         passwordLabel = tk.Label(self,
@@ -114,68 +146,73 @@ class LoginFrame(tk.Frame):
                            column = 0,
                            sticky = "e")
 
-        passwordEntry = tk.Entry(self, show = "*")
-        passwordEntry.grid(pady = 5,
+        self.passwordEntry = tk.Entry(self, show = "*")
+        self.passwordEntry.grid(pady = 5,
                            row = 2,
                            column = 1,
                            sticky = "w")
 
-        def _changeAndClearFrame(nextFrame):
-            for selectEntry in (usernameEntry, passwordEntry):
-                selectEntry.delete(0, tk.END)
-            header.config(text = "Welcome to a Password Manager!")
-            controller.changeFrame(nextFrame)
 
         # Register label and entry, responsable for sending the user to a register screen if needed
-        RegisterLabel = tk.Label(self,
+        registerLabel = tk.Label(self,
                               text = "Register",
                               font = ("Arial", 7, "bold", "underline"),
                               fg = "Blue")
-        RegisterLabel.bind("<Button-1>", lambda event: _changeAndClearFrame("RegisterFrame")) 
-        RegisterLabel.grid(pady = 5,
+        registerLabel.bind("<Button-1>", lambda event: self._changeAndClearFrame("RegisterFrame", controller)) 
+        registerLabel.grid(pady = 5,
                            row = 3,
                            column= 0)
 
-        # Function responsable for checking if the user and password are registered in the system and login
-        def _loginUser (*event):
-            if (userInfo := userExists(hashInfo(usernameEntry.get()))) == False:
-                header.config(text = "Username/Password Incorrect!")
-
-            elif hashInfo(passwordEntry.get()) != userInfo[3]:
-                header.config(text = "Username/Password Incorrect!")
-                
-            else:
-                page_name = ProfileFrame.__name__
-                frame = ProfileFrame(master, controller, userInfo)
-                controller.frames[page_name] = frame
-                frame.grid(row = 0,
-                        column = 0,
-                        sticky = "nsew")
-                _changeAndClearFrame("ProfileFrame")
         
         # Button and bind responsable for calling the login function
-        passwordEntry.bind("<Return>", _loginUser)
+        self.passwordEntry.bind("<Return>", lambda event: self._loginUser(master, controller, connection))
         LoginButton = tk.Button(self,
-                                text = "Login",
-                                command = _loginUser)
+                                text = "Login")
         LoginButton.grid(pady = 10,
                          row = 3,
                          column = 0, columnspan = 2,
                          sticky= "ns")
+        LoginButton.bind("<Button-1>", lambda event: self._loginUser(master, controller, connection))
+        
+    # Function responsable for checking if the user and password are registered in the system and login
+    def _loginUser (self, master, controller, connection):
+        hashedUser = hashInfo(self.usernameEntry.get())
+        userInfo = userExists(hashedUser, connection)
+        if userInfo == False:
+            self.header.config(text = "Username/Password Incorrect!")
+            return
+        
+        userPassword = userInfo[3]
+        if hashInfo(self.passwordEntry.get()) != userPassword:
+            self.header.config(text = "Username/Password Incorrect!")
+            return
+        
+        page_name = ProfileFrame.__name__
+        frame = ProfileFrame(connection, master, controller, userInfo)
+        controller.frames[page_name] = frame
+        frame.grid(row = 0,
+                column = 0,
+                sticky = "nsew")
+        self._changeAndClearFrame("ProfileFrame", controller)
 
+    def _changeAndClearFrame(self, nextFrame, controller):
+        for selectEntry in (self.usernameEntry, self.passwordEntry):
+            selectEntry.delete(0, tk.END)
+        self.header.config(text = "Welcome to a Password Manager!")
+        controller.changeFrame(nextFrame)
 
 # Class responsable for the register screen
 class RegisterFrame(tk.Frame):
-    def __init__(self, master, controller):
+    def __init__(self, connection, master, controller):
         tk.Frame.__init__(self, master)
         self.columnconfigure(0, minsize=100)
         self.columnconfigure(1, minsize=200)
         
         # Header Label
-        head = tk.Label(self,
+        self.header = tk.Label(self,
                      text = "Register an Account!",
                      font = ("Arial", 12, "bold"))
-        head.grid(pady = 20,
+        self.header.grid(pady = 20,
                   padx = 10,
                   row = 0,
                   column = 0, columnspan = 2,
@@ -190,14 +227,14 @@ class RegisterFrame(tk.Frame):
                            column = 0,
                            sticky = "e")
         
-        nicknameEntry = tk.Entry(self)
-        nicknameEntry.grid(pady = 5,
+        self.nicknameEntry = tk.Entry(self)
+        self.nicknameEntry.grid(pady = 5,
                            row = 1,
                            column = 1,
                            sticky = "w")
         
         # Set focus to next box
-        nicknameEntry.bind("<Return>", lambda event: usernameEntry.focus_set())
+        self.nicknameEntry.bind("<Return>", lambda event: self.usernameEntry.focus_set())
 
         # Username label and entry
         usernameLabel = tk.Label(self,
@@ -208,12 +245,12 @@ class RegisterFrame(tk.Frame):
                            column = 0,
                            sticky = "e")
         
-        usernameEntry = tk.Entry(self)
-        usernameEntry.grid(pady = 5,
+        self.usernameEntry = tk.Entry(self)
+        self.usernameEntry.grid(pady = 5,
                            row = 2,
                            column = 1,
                            sticky = "w")
-        usernameEntry.bind("<Return>", lambda event: passwordEntry.focus_set())
+        self.usernameEntry.bind("<Return>", lambda event: self.passwordEntry.focus_set())
 
         # Password label and entry
         passwordLabel = tk.Label(self,
@@ -224,12 +261,12 @@ class RegisterFrame(tk.Frame):
                            column = 0,
                            sticky = "e")
         
-        passwordEntry = tk.Entry(self, show = "*")  # Password box only shows * insted of the password
-        passwordEntry.grid(pady = 5,
+        self.passwordEntry = tk.Entry(self, show = "*")  # Password box only shows * insted of the password
+        self.passwordEntry.grid(pady = 5,
                            row = 3,
                            column = 1,
                            sticky = "w")
-        passwordEntry.bind("<Return>", lambda event: confirmPasswordEntry.focus_set())
+        self.passwordEntry.bind("<Return>", lambda event: self.confirmPasswordEntry.focus_set())
 
         # Password Confirmation label and entry
         confirmPasswordLabel = tk.Label(self,
@@ -240,63 +277,67 @@ class RegisterFrame(tk.Frame):
                                   column = 0,
                                   sticky = "e")
         
-        confirmPasswordEntry = tk.Entry(self, show = "*")  # Password confirmation box only shows *
-        confirmPasswordEntry.grid(pady = 5,
+        self.confirmPasswordEntry = tk.Entry(self, show = "*")  # Password confirmation box only shows *
+        self.confirmPasswordEntry.grid(pady = 5,
                                   row = 4,
                                   column = 1,
                                   sticky = "w")
 
-        # Returns to the login screen and clears all the entrys in the register screen
-        def _return(*event):
-            controller.changeFrame("LoginFrame")
-            for selectEntry in (nicknameEntry, usernameEntry, passwordEntry, confirmPasswordEntry):
-                selectEntry.delete(0, tk.END)
-            head.config(text = "Register an Account!")
-
-        # Registers the user
-        def _registerUser(*event):
-            # If a box is left empty
-            if nicknameEntry.get() == "" or usernameEntry.get() == "" or passwordEntry.get() == "":
-                head.config(text = "Fill All The Boxes!")
-
-            # If a username is already in use
-            elif userExists(username := hashInfo(usernameEntry.get())) != False:
-                head.config(text = "Username Unavailable!")
-
-            # If password and the password confirmation dont match
-            elif confirmPasswordEntry.get() != passwordEntry.get():
-                head.config(text = "Passwords Don't Match!")
-
-            # Registers the user if everything is ok
-            else:
-                nickname = nicknameEntry.get()
-                password = hashInfo(passwordEntry.get())
-                cursor.execute("INSERT INTO users (nickname, username, password) VALUES (?, ?, ?)", (nickname, username, password))
-                connection.commit()
-                _return()
-
         # Button and bind responsable for calling the register function
-        confirmPasswordEntry.bind("<Return>", _registerUser)
+        self.confirmPasswordEntry.bind("<Return>", lambda event: self._registerUser(controller, connection))
         RegisterButton = tk.Button(self,
-                                text = "Register",
-                                command = _registerUser)
+                                text = "Register")
         RegisterButton.grid(row = 5,
                             column = 0, columnspan = 2,
                             sticky= "ns")
+        RegisterButton.bind("<Button-1>", lambda event: self._registerUser(controller, connection))
 
         # Goes back to the login screen without registering the user
         backLabel = tk.Label(self,
                           text = "Back",
                           font = ("Arial", 7, "bold", "underline"),
                           fg = "Blue")
-        backLabel.bind("<Button-1>", _return)
+        backLabel.bind("<Button-1>", lambda event: self._return(controller))
         backLabel.grid(row = 5,
                        column= 0,
                        sticky = "ew")
 
+    # Registers the user
+    def _registerUser(self, controller, connection):
+        print("in")
+        # If a box is left empty
+        if self.nicknameEntry.get() == "" or self.usernameEntry.get() == "" or self.passwordEntry.get() == "":
+            self.header.config(text = "Fill All The Boxes!")
+            return
+
+        # If a username is already in use
+        if userExists(username := hashInfo(self.usernameEntry.get()), connection) != False:
+            self.header.config(text = "Username Unavailable!")
+            return
+
+        # If password and the password confirmation dont match
+        if self.confirmPasswordEntry.get() != self.passwordEntry.get():
+            self.header.config(text = "Passwords Don't Match!")
+            return
+
+        # Registers the user if everything is ok
+        nickname = self.nicknameEntry.get()
+        password = hashInfo(self.passwordEntry.get())
+        cursor = connection.cursor()
+        cursor.execute("INSERT INTO users (nickname, username, password) VALUES (?, ?, ?)", (nickname, username, password))
+        connection.commit()
+        cursor.close()
+        self._return(controller)
+
+    # Returns to the login screen and clears all the entrys in the register screen
+    def _return(self, controller):
+        for selectEntry in (self.nicknameEntry, self.usernameEntry, self.passwordEntry, self.confirmPasswordEntry):
+            selectEntry.delete(0, tk.END)
+        self.header.config(text = "Register an Account!")
+        controller.changeFrame("LoginFrame")
 
 class ProfileFrame(tk.Frame):
-    def __init__(self, master, controller, userInfo):
+    def __init__(self, connection, master, controller, userInfo):
         tk.Frame.__init__(self, master)
         self.userInfo = userInfo
         # Header label
@@ -313,11 +354,7 @@ class ProfileFrame(tk.Frame):
                           fg = "red")
         logoff.pack(anchor = "nw")
 
-        def _logoff(*event):
-            self.destroy()
-            controller.changeFrame("LoginFrame")
-
-        logoff.bind("<Button-1>", _logoff)
+        logoff.bind("<Button-1>", lambda evenet: self._logoff(controller))
 
         # Separator from the Username and accounts
         headerSeparator = tk.Canvas(self,
@@ -335,115 +372,118 @@ class ProfileFrame(tk.Frame):
 
         self.canvas.configure(yscrollcommand = scrollbar.set)
 
-        self._loadAccounts(self.canvas, self.userInfo)
+        self._loadAccounts(connection)
 
 
-    def _loadAccounts(self, canvas, userInfo):
-        self.accountsHolder = ttk.Frame(canvas)
-        canvas.create_window((0, 0), window = self.accountsHolder, anchor = "nw")
+    def _loadAccounts(self, connection):
+        self.accountsHolder = ttk.Frame(self.canvas)
+        self.canvas.create_window((0, 0), window = self.accountsHolder, anchor = "nw")
         
         for i in range(4):
             self.accountsHolder.columnconfigure(i, minsize = 175)
 
         self.accounts = {}
-        accounts = getAccounts(userInfo[0])
+        accounts = getAccounts(self.userInfo[0], connection)
         
         for row, account in enumerate(accounts):
             accountId, plataform, login, password, logo = account[0:5]
-            self.listAccount(accountId, plataform, login, password, logo, row, self.accountsHolder)
+            self.listAccount(accountId, plataform, login, password, logo, row, self.accountsHolder, connection)
         
-        def _addAccount():
-            popup = tk.Toplevel()
-            popup.title("Add Account")
-
-            widgets = tk.Frame(popup)
-            widgets.pack(anchor = "center")
-
-            placeHolder = Image.open("assets/Question_Mark.png")
-            placeHolder.thumbnail((100, 100))
-            placeHolder = ImageTk.PhotoImage(placeHolder)
-
-            addPlataformLogo = tk.Label(widgets, image = placeHolder)
-            addPlataformLogo.grid(row = 0, rowspan = 3,
-                                    column = 0)
-            addPlataformLogo.image = placeHolder
-
-            addPlataformLogo.bind("<Button-1>", lambda event: _addLogo())
-
-            addPlataformLabel = tk.Label(widgets, text = "Plataform:")
-            addPlataformLabel.grid(row = 0,
-                                    column = 1)
-
-            addPlataformEntry = tk.Entry(widgets)
-            addPlataformEntry.grid(row = 0,
-                                    column = 2)
-            addPlataformEntry.bind("<Return>", lambda event: addLoginEntry.focus_set())
-
-            addLoginLabel = tk.Label(widgets, text = "Login:")
-            addLoginLabel.grid(row = 1,
-                                column = 1)
-
-            addLoginEntry = tk.Entry(widgets)
-            addLoginEntry.grid(row = 1,
-                                column = 2)
-            addLoginEntry.bind("<Return>", lambda event: addPasswordEntry.focus_set())
-            
-            addPasswordLabel = tk.Label(widgets, text = "Password:")
-            addPasswordLabel.grid(row = 2,
-                                    column = 1)
-
-            addPasswordEntry = tk.Entry(widgets)
-            addPasswordEntry.grid(row = 2,
-                                    column = 2)
-            
-            def _saveAccount():
-                try:
-                    account = [addPlataformEntry.get(), addLoginEntry.get(), addPasswordEntry.get(), _saveAccount.logoBytes, userInfo[0]]
-                    cursor.execute("INSERT INTO accounts (plataform, login, password, logo, user_id) VALUES (?, ?, ?, ?, ?)", (account))
-                except AttributeError:
-                    account = [addPlataformEntry.get(), addLoginEntry.get(), addPasswordEntry.get(), userInfo[0]]
-                    cursor.execute("INSERT INTO accounts (plataform, login, password, user_id) VALUES (?, ?, ?, ?)", (account))
-                connection.commit()
-                
-                self._reloadAccounts()
-                popup.destroy()
-
-            saveButton = tk.Button(widgets,
-                                    text = "Add",
-                                    command = _saveAccount)
-            saveButton.grid(row = 3,
-                            column = 0, columnspan = 3)
-            
-            def _addLogo():
-                logoPath = filedialog.askopenfilename()
-                logoImg = Image.open(logoPath)
-                logoImg.thumbnail((100, 100))
-                with open(logoPath, "rb") as file:
-                    _saveAccount.logoBytes = file.read()
-
-                logoImg = ImageTk.PhotoImage(logoImg)
-                addPlataformLogo.config(image = logoImg)
-                addPlataformLogo.image = logoImg
-
         plusImage = Image.open("assets/Plus_Icon.png")
         plusImage.thumbnail((75, 75))
         plusImage = ImageTk.PhotoImage(plusImage)
 
         addPlataformButton = tk.Button(self.accountsHolder,
-                                        image = plusImage,
-                                        command = _addAccount)
+                                        image = plusImage)
+        addPlataformButton.bind("<Button-1>", lambda event: self._addAccount(connection))
         addPlataformButton.grid(column = 1, columnspan = 2,
                                 sticky = "s")
         addPlataformButton.image = plusImage
         
         self.accountsHolder.update_idletasks()
-        canvas.configure(scrollregion=canvas.bbox("all"))
+        self.canvas.configure(scrollregion = self.canvas.bbox("all"))
         
-    def _reloadAccounts(self):
-        self.accountsHolder.destroy()
-        self._loadAccounts(self.canvas, self.userInfo)
+    def _addAccount(self, connection):
+        popup = tk.Toplevel()
+        popup.title("Add Account")
+
+        widgets = tk.Frame(popup)
+        widgets.pack(anchor = "center")
+
+        def _addLogo():
+            logoPath = filedialog.askopenfilename()
+            logoImg = Image.open(logoPath)
+            logoImg.thumbnail((100, 100))
+            with open(logoPath, "rb") as file:
+                _saveAccount.logoBytes = file.read()
+
+            logoImg = ImageTk.PhotoImage(logoImg)
+            addPlataformLogo.config(image = logoImg)
+            addPlataformLogo.image = logoImg
+
+        placeHolder = Image.open("assets/Question_Mark.png")
+        placeHolder.thumbnail((100, 100))
+        placeHolder = ImageTk.PhotoImage(placeHolder)
+
+        addPlataformLogo = tk.Label(widgets, image = placeHolder)
+        addPlataformLogo.grid(row = 0, rowspan = 3,
+                                column = 0)
+        addPlataformLogo.image = placeHolder
+
+        addPlataformLogo.bind("<Button-1>", lambda event: _addLogo())
+
+        addPlataformLabel = tk.Label(widgets, text = "Plataform:")
+        addPlataformLabel.grid(row = 0,
+                                column = 1)
+
+        addPlataformEntry = tk.Entry(widgets)
+        addPlataformEntry.grid(row = 0,
+                                column = 2)
+        addPlataformEntry.bind("<Return>", lambda event: addLoginEntry.focus_set())
+
+        addLoginLabel = tk.Label(widgets, text = "Login:")
+        addLoginLabel.grid(row = 1,
+                            column = 1)
+
+        addLoginEntry = tk.Entry(widgets)
+        addLoginEntry.grid(row = 1,
+                            column = 2)
+        addLoginEntry.bind("<Return>", lambda event: addPasswordEntry.focus_set())
+        
+        addPasswordLabel = tk.Label(widgets, text = "Password:")
+        addPasswordLabel.grid(row = 2,
+                                column = 1)
+
+        addPasswordEntry = tk.Entry(widgets)
+        addPasswordEntry.grid(row = 2,
+                                column = 2)
+        
+        
+        def _saveAccount():
+            cursor = connection.cursor()
+            try:
+                account = [addPlataformEntry.get(), addLoginEntry.get(), addPasswordEntry.get(), _saveAccount.logoBytes, self.userInfo[0]]
+                cursor.execute("INSERT INTO accounts (plataform, login, password, logo, user_id) VALUES (?, ?, ?, ?, ?)", (account))
+            except AttributeError:
+                account = [addPlataformEntry.get(), addLoginEntry.get(), addPasswordEntry.get(), self.userInfo[0]]
+                cursor.execute("INSERT INTO accounts (plataform, login, password, user_id) VALUES (?, ?, ?, ?)", (account))
+            connection.commit()
+            cursor.close()
+            
+            self._reloadAccounts(connection)
+            popup.destroy()
+
+        saveButton = tk.Button(widgets,
+                                text = "Add",
+                                command = _saveAccount)
+        saveButton.grid(row = 3,
+                        column = 0, columnspan = 3)
     
-    def listAccount(self, accountId, plataform, login, password, logo, frameRow, holder):
+    def _reloadAccounts(self, connection):
+        self.accountsHolder.destroy()
+        self._loadAccounts(connection)
+    
+    def listAccount(self, accountId, plataform, login, password, logo, frameRow, holder, connection):
         accountFrame = tk.Frame(holder)
         accountFrame.grid(row = (frameRow),
                         column = 0, columnspan = 4,
@@ -493,9 +533,11 @@ class ProfileFrame(tk.Frame):
                         sticky = "w")
 
         def _deleteAccount(accountId):
+            cursor = connection.cursor()
             cursor.execute("DELETE FROM accounts WHERE id = ?", (accountId,))
             connection.commit()
-            self._reloadAccounts()
+            cursor.close()
+            self._reloadAccounts(connection)
 
         deleteIcon = Image.open("assets/Delete.png")
         deleteIcon.thumbnail((75, 75))
@@ -510,8 +552,10 @@ class ProfileFrame(tk.Frame):
         deleteButton.bind("<Button-1>", lambda evenet: _deleteAccount(accountId))
 
         def _editAccount(accountId):
+            cursor = connection.cursor()
             cursor.execute("SELECT * FROM accounts WHERE id = ?", (accountId,))
             account = cursor.fetchmany()
+            cursor.close()
             print(account)
             
             popup = tk.Toplevel()
@@ -550,11 +594,13 @@ class ProfileFrame(tk.Frame):
                                    column = 2)
 
             def _saveEdit():
+                cursor = connection.cursor()
                 cursor.execute("UPDATE accounts SET plataform = ?, login = ?, password = ? WHERE id = ?", (editPlataformEntry.get(), editLoginEntry.get(), editPasswordEntry.get(), account[0][0],))
                 connection.commit()
-                self._reloadAccounts()
+                cursor.close()
+                self._reloadAccounts(connection)
                 popup.destroy()
-                            
+
             saveEditButton = tk.Button(widgets,
                                        text = "Save",
                                        command = _saveEdit)
@@ -587,9 +633,11 @@ class ProfileFrame(tk.Frame):
             logoImg.thumbnail((100, 100))
             with open(logoPath, "rb") as file:
                 logoBytes = file.read()
-                
+            
+            cursor = connection.cursor()
             cursor.execute("UPDATE accounts SET logo = ? WHERE id = ?", (logoBytes, accountId,))
             connection.commit()
+            cursor.close()
 
             logoImg = ImageTk.PhotoImage(logoImg)
             accountFrame = self.accounts[accountId]
@@ -597,33 +645,12 @@ class ProfileFrame(tk.Frame):
             plataformLogo.config(image = logoImg)
             plataformLogo.image = logoImg
 
+    def _logoff(self, controller):
+            self.destroy()
+            controller.changeFrame("LoginFrame")
+
 
 
 if __name__ == '__main__':
-    window = PasswordManager()
-    connection = sqlite3.connect("UsersInfo.db")    
-    cursor = connection.cursor()
-
-    # Checks if the tables exist in the data base, if they dont, create them
-    cursor.execute("SELECT count(*) FROM sqlite_master WHERE type='table'")
-    result = cursor.fetchone()
-    if result[0] == 0:
-        cursor.execute("""CREATE TABLE users
-                      (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                       nickname VARCHAR,
-                       username VARCHAR UNIQUE,
-                       password VARCHAR)""")
-        cursor.execute("""CREATE TABLE accounts
-                      (id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                       plataform VARCHAR,
-                       login VARCHAR,
-                       password VARCHAR,
-                       logo BLOB,
-                       user_id INTEGER,
-                       FOREIGN KEY (user_id) REFERENCES users(id))""")
-        connection.commit()
-    else:
-        pass
-    
+    window = PasswordManager()    
     window.mainloop()
-    connection.close()
