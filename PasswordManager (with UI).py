@@ -26,113 +26,6 @@ def hashInfo(info):
     return hashlib.md5(info.encode()).hexdigest()
 
 
-def listAccount(accountId, plataform, login, password, logo, frameRow, holder, master):
-    accountFrame = tk.Frame(holder)
-    accountFrame.grid(row = (frameRow),
-                      column = 0, columnspan = 4,
-                      sticky = "nsew")
-    
-    master.accounts[accountId] = accountFrame
-
-    accountFrame.columnconfigure(0, minsize = 110)
-    accountFrame.columnconfigure(1, minsize = 370)
-    accountFrame.columnconfigure(2, minsize = 110)
-    accountFrame.columnconfigure(3, minsize = 110)
-
-    if logo != None:
-        logo = Image.open(BytesIO(logo))
-        logo.thumbnail((100, 100))
-        logo = ImageTk.PhotoImage(logo)
-        plataformLogo = tk.Label(accountFrame, image = logo)
-        plataformLogo.image = logo
-    else:
-        placeHolder = Image.open("assets/Question_Mark.png")
-        placeHolder.thumbnail((100, 100))
-        placeHolder = ImageTk.PhotoImage(placeHolder)
-        plataformLogo = tk.Label(accountFrame, image = placeHolder)
-        plataformLogo.image = placeHolder
-
-    plataformLogo.grid(row = 0, rowspan = 3,
-                       column = 0,
-                       sticky = "w")
-    plataformLogo.bind("<Button-1>", lambda event: _changeLogo(accountId))
-
-    plataformLabel = tk.Label(accountFrame,
-                              text = plataform)
-    plataformLabel.grid(row = 0,
-                        column = 1,
-                        sticky = "w")
-
-    loginLabel = tk.Label(accountFrame,
-                          text = login)
-    loginLabel.grid(row = 1,
-                    column = 1,
-                    sticky = "w")
-
-    passwordLabel = tk.Label(accountFrame,
-                             text = password)
-    passwordLabel.grid(row = 2,
-                       column = 1,
-                       sticky = "w")
-
-    def _deleteAccount(accountId):
-        cursor.execute("DELETE FROM accounts WHERE id = ?", (accountId,))
-        connection.commit()
-        master._reloadAccounts()
-
-    deleteIcon = Image.open("assets/Delete.png")
-    deleteIcon.thumbnail((75, 75))
-    deleteIcon = ImageTk.PhotoImage(deleteIcon)
-
-    deleteButton = tk.Button(accountFrame,
-                             image = deleteIcon)
-    deleteButton.image = deleteIcon
-    deleteButton.grid(row = 0, rowspan = 3,
-                      column = 3,
-                      sticky = "w")
-    deleteButton.bind("<Button-1>", lambda evenet: _deleteAccount(accountId))
-
-    def _editAccount(accountId):
-        print(accountId)
-        master._reloadAccounts()
-
-    editIcon = Image.open("assets/Edit.png")
-    editIcon.thumbnail((75, 75))
-    editIcon = ImageTk.PhotoImage(editIcon)
-
-    editButton = tk.Button(accountFrame,
-                           image = editIcon)
-    editButton.image = editIcon
-    editButton.grid(row = 0, rowspan = 3,
-                    column = 2,
-                    sticky = "w")
-    editButton.bind("<Button-1>", lambda evenet: _editAccount(accountId))
-    
-    separator = tk.Canvas(accountFrame,
-                          width = 700,
-                          height = 5)
-    separator.grid(row = 3,
-                   column = 0, columnspan = 4,
-                   sticky = "s")
-    separator.create_line(0, 3, 700, 3, width = 3, fill = "black")
-
-    def _changeLogo(accountId):
-        logoPath = filedialog.askopenfilename()
-        logoImg = Image.open(logoPath)
-        logoImg.thumbnail((100, 100))
-        with open(logoPath, "rb") as file:
-            logoBytes = file.read()
-            
-        cursor.execute("UPDATE accounts SET logo = ? WHERE id = ?", (logoBytes, accountId,))
-        connection.commit()
-
-        logoImg = ImageTk.PhotoImage(logoImg)
-        accountFrame = master.accounts[accountId]
-        plataformLogo = accountFrame.children["!label"]
-        plataformLogo.config(image = logoImg)
-        plataformLogo.image = logoImg
-
-
 # Class responsable to loading the frames and app
 class PasswordManager(tk.Tk):
     def __init__(self):
@@ -457,7 +350,7 @@ class ProfileFrame(tk.Frame):
         
         for row, account in enumerate(accounts):
             accountId, plataform, login, password, logo = account[0:5]
-            listAccount(accountId, plataform, login, password, logo, row, self.accountsHolder, self)
+            self.listAccount(accountId, plataform, login, password, logo, row, self.accountsHolder)
         
         def _addAccount():
             popup = tk.Toplevel()
@@ -484,7 +377,8 @@ class ProfileFrame(tk.Frame):
             addPlataformEntry = tk.Entry(widgets)
             addPlataformEntry.grid(row = 0,
                                     column = 2)
-            
+            addPlataformEntry.bind("<Return>", lambda event: addLoginEntry.focus_set())
+
             addLoginLabel = tk.Label(widgets, text = "Login:")
             addLoginLabel.grid(row = 1,
                                 column = 1)
@@ -492,6 +386,7 @@ class ProfileFrame(tk.Frame):
             addLoginEntry = tk.Entry(widgets)
             addLoginEntry.grid(row = 1,
                                 column = 2)
+            addLoginEntry.bind("<Return>", lambda event: addPasswordEntry.focus_set())
             
             addPasswordLabel = tk.Label(widgets, text = "Password:")
             addPasswordLabel.grid(row = 2,
@@ -505,7 +400,6 @@ class ProfileFrame(tk.Frame):
                 try:
                     account = [addPlataformEntry.get(), addLoginEntry.get(), addPasswordEntry.get(), _saveAccount.logoBytes, userInfo[0]]
                     cursor.execute("INSERT INTO accounts (plataform, login, password, logo, user_id) VALUES (?, ?, ?, ?, ?)", (account))
-                
                 except AttributeError:
                     account = [addPlataformEntry.get(), addLoginEntry.get(), addPasswordEntry.get(), userInfo[0]]
                     cursor.execute("INSERT INTO accounts (plataform, login, password, user_id) VALUES (?, ?, ?, ?)", (account))
@@ -548,6 +442,112 @@ class ProfileFrame(tk.Frame):
     def _reloadAccounts(self):
         self.accountsHolder.destroy()
         self._loadAccounts(self.canvas, self.userInfo)
+    
+    def listAccount(self, accountId, plataform, login, password, logo, frameRow, holder):
+        accountFrame = tk.Frame(holder)
+        accountFrame.grid(row = (frameRow),
+                        column = 0, columnspan = 4,
+                        sticky = "nsew")
+        
+        self.accounts[accountId] = accountFrame
+
+        accountFrame.columnconfigure(0, minsize = 110)
+        accountFrame.columnconfigure(1, minsize = 370)
+        accountFrame.columnconfigure(2, minsize = 110)
+        accountFrame.columnconfigure(3, minsize = 110)
+
+        if logo != None:
+            logo = Image.open(BytesIO(logo))
+            logo.thumbnail((100, 100))
+            logo = ImageTk.PhotoImage(logo)
+            plataformLogo = tk.Label(accountFrame, image = logo)
+            plataformLogo.image = logo
+        else:
+            placeHolder = Image.open("assets/Question_Mark.png")
+            placeHolder.thumbnail((100, 100))
+            placeHolder = ImageTk.PhotoImage(placeHolder)
+            plataformLogo = tk.Label(accountFrame, image = placeHolder)
+            plataformLogo.image = placeHolder
+
+        plataformLogo.grid(row = 0, rowspan = 3,
+                        column = 0,
+                        sticky = "w")
+        plataformLogo.bind("<Button-1>", lambda event: _changeLogo(accountId))
+
+        plataformLabel = tk.Label(accountFrame,
+                                text = plataform)
+        plataformLabel.grid(row = 0,
+                            column = 1,
+                            sticky = "w")
+
+        loginLabel = tk.Label(accountFrame,
+                            text = login)
+        loginLabel.grid(row = 1,
+                        column = 1,
+                        sticky = "w")
+
+        passwordLabel = tk.Label(accountFrame,
+                                text = password)
+        passwordLabel.grid(row = 2,
+                        column = 1,
+                        sticky = "w")
+
+        def _deleteAccount(accountId):
+            cursor.execute("DELETE FROM accounts WHERE id = ?", (accountId,))
+            connection.commit()
+            self._reloadAccounts()
+
+        deleteIcon = Image.open("assets/Delete.png")
+        deleteIcon.thumbnail((75, 75))
+        deleteIcon = ImageTk.PhotoImage(deleteIcon)
+
+        deleteButton = tk.Button(accountFrame,
+                                image = deleteIcon)
+        deleteButton.image = deleteIcon
+        deleteButton.grid(row = 0, rowspan = 3,
+                        column = 3,
+                        sticky = "w")
+        deleteButton.bind("<Button-1>", lambda evenet: _deleteAccount(accountId))
+
+        def _editAccount(accountId):
+            print(accountId)
+            self._reloadAccounts()
+
+        editIcon = Image.open("assets/Edit.png")
+        editIcon.thumbnail((75, 75))
+        editIcon = ImageTk.PhotoImage(editIcon)
+
+        editButton = tk.Button(accountFrame,
+                            image = editIcon)
+        editButton.image = editIcon
+        editButton.grid(row = 0, rowspan = 3,
+                        column = 2,
+                        sticky = "w")
+        editButton.bind("<Button-1>", lambda evenet: _editAccount(accountId))
+        
+        separator = tk.Canvas(accountFrame,
+                            width = 700,
+                            height = 5)
+        separator.grid(row = 3,
+                    column = 0, columnspan = 4,
+                    sticky = "s")
+        separator.create_line(0, 3, 700, 3, width = 3, fill = "black")
+
+        def _changeLogo(accountId):
+            logoPath = filedialog.askopenfilename()
+            logoImg = Image.open(logoPath)
+            logoImg.thumbnail((100, 100))
+            with open(logoPath, "rb") as file:
+                logoBytes = file.read()
+                
+            cursor.execute("UPDATE accounts SET logo = ? WHERE id = ?", (logoBytes, accountId,))
+            connection.commit()
+
+            logoImg = ImageTk.PhotoImage(logoImg)
+            accountFrame = self.accounts[accountId]
+            plataformLogo = accountFrame.children["!label"]
+            plataformLogo.config(image = logoImg)
+            plataformLogo.image = logoImg
 
 
 
