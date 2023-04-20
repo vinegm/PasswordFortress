@@ -510,8 +510,56 @@ class ProfileFrame(tk.Frame):
         deleteButton.bind("<Button-1>", lambda evenet: _deleteAccount(accountId))
 
         def _editAccount(accountId):
-            print(accountId)
-            self._reloadAccounts()
+            cursor.execute("SELECT * FROM accounts WHERE id = ?", (accountId,))
+            account = cursor.fetchmany()
+            print(account)
+            
+            popup = tk.Toplevel()
+            popup.title("Edit Account")
+
+            widgets = tk.Frame(popup)
+            widgets.pack(anchor = "center")
+
+            editPlataformLabel = tk.Label(widgets, text = "Plataform:")
+            editPlataformLabel.grid(row = 0,
+                                   column = 1)
+
+            editPlataformEntry = tk.Entry(widgets)
+            editPlataformEntry.insert(0, account[0][1])
+            editPlataformEntry.grid(row = 0,
+                                    column = 2)
+            editPlataformEntry.bind("<Return>", lambda event: editLoginEntry.focus_set())
+
+            editLoginLabel = tk.Label(widgets, text = "Login:")
+            editLoginLabel.grid(row = 1,
+                                column = 1)
+
+            editLoginEntry = tk.Entry(widgets)
+            editLoginEntry.insert(0, account[0][2])
+            editLoginEntry.grid(row = 1,
+                                column = 2)
+            editLoginEntry.bind("<Return>", lambda event: editPasswordEntry.focus_set())
+            
+            editPasswordLabel = tk.Label(widgets, text = "Password:")
+            editPasswordLabel.grid(row = 2,
+                                   column = 1)
+
+            editPasswordEntry = tk.Entry(widgets)
+            editPasswordEntry.insert(0, account[0][3])
+            editPasswordEntry.grid(row = 2,
+                                   column = 2)
+
+            def _saveEdit():
+                cursor.execute("UPDATE accounts SET plataform = ?, login = ?, password = ? WHERE id = ?", (editPlataformEntry.get(), editLoginEntry.get(), editPasswordEntry.get(), account[0][0],))
+                connection.commit()
+                self._reloadAccounts()
+                popup.destroy()
+                            
+            saveEditButton = tk.Button(widgets,
+                                       text = "Save",
+                                       command = _saveEdit)
+            saveEditButton.grid(row = 3,
+                                column = 0, columnspan = 3)
 
         editIcon = Image.open("assets/Edit.png")
         editIcon.thumbnail((75, 75))
