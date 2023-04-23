@@ -5,4 +5,5 @@
 <li> Learn criptography. </li>
 <li> Add a "copy password" button </li>
 <li> Add a "show/hide password" button </li>
+<li> Add a "generate password" feature that generates and stores hard to guess code. </li>
 <li> Turn the project in a .exe. </li>
