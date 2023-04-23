@@ -308,7 +308,6 @@ class RegisterFrame(tk.Frame):
 
     # Registers the user
     def _registerUser(self, controller, connection):
-        print("in")
         # If a box is left empty
         if self.nicknameEntry.get() == "" or self.usernameEntry.get() == "" or self.passwordEntry.get() == "":
             self.header.config(text = "Fill All The Boxes!")
