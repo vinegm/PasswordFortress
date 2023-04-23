@@ -560,7 +560,6 @@ class ProfileFrame(tk.Frame):
             cursor.execute("SELECT * FROM accounts WHERE id = ?", (accountId,))
             account = cursor.fetchmany()
             cursor.close()
-            print(account)
             
             popup = tk.Toplevel()
             popup.title("Edit Account")
