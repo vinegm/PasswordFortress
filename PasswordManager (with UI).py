@@ -1,3 +1,7 @@
+"""
+Password manager
+ The project focus on making a desktop app that stores the users accounts safely in a friendly and simple way
+"""
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
