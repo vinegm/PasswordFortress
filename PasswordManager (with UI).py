@@ -431,6 +431,8 @@ class ProfileFrame(tk.Frame):
     _loadAccounts: Loads the accounts and widgets from the frame
     _addAccount: Creates a pop-up window for the user to add a account
     _reloadAccounts: Destroy and makes the frame again to reaload it
+    _listAccount: Lists the accounts on the frame
+    _logoff: Destroys the logged in frame and goes back to the LoginFrame
     """
     def __init__(self, connection, master, controller, userInfo):
         tk.Frame.__init__(self, master)
@@ -487,7 +489,7 @@ class ProfileFrame(tk.Frame):
         
         for row, account in enumerate(accounts):
             accountId, plataform, login, password, logo = account[0:5]
-            self.listAccount(accountId, plataform, login, password, logo, row, self.accountsHolder, connection)
+            self._listAccount(accountId, plataform, login, password, logo, row, self.accountsHolder, connection)
         
         plusImage = Image.open("assets/Plus_Icon.png")
         plusImage.thumbnail((75, 75))
@@ -516,6 +518,7 @@ class ProfileFrame(tk.Frame):
         widgets.pack(anchor = "center")
 
         def _addLogo():
+            """Changes the logo of the new account"""
             logoPath = filedialog.askopenfilename()
             logoImg = Image.open(logoPath)
             logoImg.thumbnail((100, 100))
@@ -565,6 +568,7 @@ class ProfileFrame(tk.Frame):
         
         
         def _saveAccount():
+            """Saves the account to the database"""
             cursor = connection.cursor()
             try:
                 account = [addPlataformEntry.get(), addLoginEntry.get(), addPasswordEntry.get(), _saveAccount.logoBytes, self.userInfo[0]]
@@ -589,7 +593,19 @@ class ProfileFrame(tk.Frame):
         self.accountsHolder.destroy()
         self._loadAccounts(connection)
     
-    def listAccount(self, accountId, plataform, login, password, logo, frameRow, holder, connection):
+    def _listAccount(self, accountId, plataform, login, password, logo, frameRow, holder, connection):
+        """Lists the accounts on the frame
+        
+        Parameters:
+        accountId: Id of the account in the database
+        plataform: Plataform of the account
+        login: Login of the account
+        password: Password of the account
+        logo: Logo of the plataform
+        frameRow: Row where the account must be shown
+        holder: Frame that holds the widgets
+        connection: Database of the app
+        """
         accountFrame = tk.Frame(holder)
         accountFrame.grid(row = (frameRow),
                         column = 0, columnspan = 4,
@@ -639,6 +655,11 @@ class ProfileFrame(tk.Frame):
                         sticky = "w")
 
         def _deleteAccount(accountId):
+            """Deletes a given account
+
+            Parameters:
+            accountId: Id of the account to be deleted
+            """
             cursor = connection.cursor()
             cursor.execute("DELETE FROM accounts WHERE id = ?", (accountId,))
             connection.commit()
@@ -658,6 +679,11 @@ class ProfileFrame(tk.Frame):
         deleteButton.bind("<Button-1>", lambda evenet: _deleteAccount(accountId))
 
         def _editAccount(accountId):
+            """Edits a existing account
+            
+            Parameters:
+            accountId: Id of the account that will be edited
+            """
             cursor = connection.cursor()
             cursor.execute("SELECT * FROM accounts WHERE id = ?", (accountId,))
             account = cursor.fetchmany()
@@ -699,6 +725,7 @@ class ProfileFrame(tk.Frame):
                                    column = 2)
 
             def _saveEdit():
+                """Saves the edited account to the database"""
                 cursor = connection.cursor()
                 cursor.execute("UPDATE accounts SET plataform = ?, login = ?, password = ? WHERE id = ?", (editPlataformEntry.get(), editLoginEntry.get(), editPasswordEntry.get(), account[0][0],))
                 connection.commit()
@@ -733,6 +760,11 @@ class ProfileFrame(tk.Frame):
         separator.create_line(0, 3, 700, 3, width = 3, fill = "black")
 
         def _changeLogo(accountId):
+            """Changes the logo of a given account
+            
+            Parameters:
+            accountId: Id of the account that will have its logo changed
+            """
             logoPath = filedialog.askopenfilename()
             logoImg = Image.open(logoPath)
             logoImg.thumbnail((100, 100))
@@ -751,8 +783,13 @@ class ProfileFrame(tk.Frame):
             plataformLogo.image = logoImg
 
     def _logoff(self, controller):
-            self.destroy()
-            controller.changeFrame("LoginFrame")
+        """Destroys the logged in frame and goes back to the LoginFrame
+        
+        Parameters:
+        controller: Master window, used to call the function changeFrame
+        """
+        self.destroy()
+        controller.changeFrame("LoginFrame")
 
 
 
