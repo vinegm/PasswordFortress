@@ -2,6 +2,7 @@
 Password manager
  The project focus on making a desktop app that stores the users accounts safely in a friendly and simple way
 """
+
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
@@ -10,8 +11,13 @@ from io import BytesIO
 import sqlite3
 import hashlib
 
-# Checks if the tables exist in the data base, if they dont, create them
+
 def setDatabase (connection):
+    """If the database doesnt exist in the directory, creates it
+    
+    Parameters:
+    connection: SQLite3 connection to a data base
+    """
     cursor = connection.cursor()
     cursor.execute("SELECT count(*) FROM sqlite_master WHERE type='table'")
     result = cursor.fetchone()
@@ -35,8 +41,17 @@ def setDatabase (connection):
     return
 
 
-# Checks if user exists in the database, if not, returns false, if the user exists returns the hashed password
 def userExists(search, connection):
+    """Checks if a user exists on the database
+    
+    Parameters:
+    search: User to be searched for in the database
+    connection: Database that will be searched
+
+    Returns:
+    False: If the user doesnt exist
+    result: A tuple with the user information
+    """
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM users WHERE username = ?", (search,))
     result = cursor.fetchone()
@@ -47,6 +62,15 @@ def userExists(search, connection):
 
 
 def getAccounts(userId, connection):
+    """Gets all the accounts of a given user
+
+    Parameters:
+    UserId: Id of the user in the database
+    connection: Database that will be searched
+
+    returns:
+    accounts: All the accounts from the user in a tuple
+    """
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM accounts WHERE user_id = ?", (userId,))
     accounts = cursor.fetchall()
@@ -54,13 +78,24 @@ def getAccounts(userId, connection):
     return accounts
 
 
-# Hashed the info given to it, used to simplify code
 def hashInfo(info):
-    return hashlib.md5(info.encode()).hexdigest()
+    """Takes a paramater and hashed it using the hash function blake2b
+
+    Parameters:
+    info (any): Value to be hashed
+
+    Returns:
+    The hashed info
+    """
+    return hashlib.blake2b(info.encode()).hexdigest()
 
 
-# Class responsable to loading the frames and app
 class PasswordManager(tk.Tk):
+    """Main class of the app, starts the database and frames
+
+    Methods:
+    changeFrame(): Changes between existing frames
+    """
     def __init__(self):
         tk.Tk.__init__(self)
 
@@ -86,8 +121,12 @@ class PasswordManager(tk.Tk):
     
         self.changeFrame("LoginFrame")
 
-    # Function responsable for changing the frames, loading one on top of another
     def changeFrame(self, nextFrame):
+        """Changes between existing frames
+
+        Parameters:
+        nextFrame: Frame that will be raised 
+        """
         frame = self.frames[nextFrame]
         frame.tkraise()
         if nextFrame == "LoginFrame":
@@ -105,9 +144,18 @@ class PasswordManager(tk.Tk):
         self.resizable(False, False)
 
 
-
-# Class responsable for the login screen
 class LoginFrame(tk.Frame):
+    """Frame responsable for login a user in the app
+
+    Attributes:
+    Connection: Database of the app
+    master: Widget/window where this frame will be loaded
+    controller: Main class of the app 
+
+    Methods:
+    _loginUser: Checks if username and password match a user and logs said user
+    _changeAndClearFrame: Changes the raised frame and clear the widgets in this one
+    """
     def __init__(self, connection, master, controller):
         tk.Frame.__init__(self, master)
         self.columnconfigure(0, minsize=100)
@@ -178,8 +226,14 @@ class LoginFrame(tk.Frame):
                          sticky= "ns")
         LoginButton.bind("<Button-1>", lambda event: self._loginUser(master, controller, connection))
         
-    # Function responsable for checking if the user and password are registered in the system and login
     def _loginUser (self, master, controller, connection):
+        """Checks if username and password match a user and logs said user
+
+        Parameters:
+        master: Frame that holds the loaded frames
+        controller: Window of the app
+        connection: Main class of the app
+        """
         hashedUser = hashInfo(self.usernameEntry.get())
         userInfo = userExists(hashedUser, connection)
         if userInfo == False:
@@ -200,6 +254,11 @@ class LoginFrame(tk.Frame):
         self._changeAndClearFrame("ProfileFrame", controller)
 
     def _changeAndClearFrame(self, nextFrame, controller):
+        """Changes the raised frame and clear the widgets in this one
+
+        Parameters:
+        nextFrame: frame that will be raised
+        """
         for selectEntry in (self.usernameEntry, self.passwordEntry):
             selectEntry.delete(0, tk.END)
         self.header.config(text = "Welcome to a Password Manager!")
