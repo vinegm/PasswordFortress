@@ -264,8 +264,19 @@ class LoginFrame(tk.Frame):
         self.header.config(text = "Welcome to a Password Manager!")
         controller.changeFrame(nextFrame)
 
-# Class responsable for the register screen
+
 class RegisterFrame(tk.Frame):
+    """Frame responsable for registering a user in the app
+
+    Attributes:
+    Connection: Database of the app
+    master: Widget/window where this frame will be loaded
+    controller: Main class of the app
+
+    Methods:
+    _registerUser: Registers a user if all the "if's" are passed and returns to the LoginFrame
+    _return: Returns to the LoginFrame and clears all the widgets from this one
+    """
     def __init__(self, connection, master, controller):
         tk.Frame.__init__(self, master)
         self.columnconfigure(0, minsize=100)
@@ -365,8 +376,13 @@ class RegisterFrame(tk.Frame):
                        column= 0,
                        sticky = "ew")
 
-    # Registers the user
     def _registerUser(self, controller, connection):
+        """Registers a user if all the "if's" are passed and returns to the LoginFrame
+
+        Parameters:
+        controller: Main class of the app
+        connection: database of the app
+        """
         # If a box is left empty
         if self.nicknameEntry.get() == "" or self.usernameEntry.get() == "" or self.passwordEntry.get() == "":
             self.header.config(text = "Fill All The Boxes!")
@@ -391,14 +407,31 @@ class RegisterFrame(tk.Frame):
         cursor.close()
         self._return(controller)
 
-    # Returns to the login screen and clears all the entrys in the register screen
     def _return(self, controller):
+        """Returns to the LoginFrame and clears all the widgets from this one
+        
+        Parameters:
+        Controller: Main class of the app, used to call the function to change frame
+        """
         for selectEntry in (self.nicknameEntry, self.usernameEntry, self.passwordEntry, self.confirmPasswordEntry):
             selectEntry.delete(0, tk.END)
         self.header.config(text = "Register an Account!")
         controller.changeFrame("LoginFrame")
 
 class ProfileFrame(tk.Frame):
+    """Frame responsable for registering a user in the app
+
+    Attributes:
+    Connection: Database of the app
+    master: Widget/window where this frame will be loaded
+    controller: Main class of the app
+    userInfo (tuple): Contains all the login information of the user
+
+    Methods:
+    _loadAccounts: Loads the accounts and widgets from the frame
+    _addAccount: Creates a pop-up window for the user to add a account
+    _reloadAccounts: Destroy and makes the frame again to reaload it
+    """
     def __init__(self, connection, master, controller, userInfo):
         tk.Frame.__init__(self, master)
         self.userInfo = userInfo
@@ -438,6 +471,11 @@ class ProfileFrame(tk.Frame):
 
 
     def _loadAccounts(self, connection):
+        """Loads the accounts and widgets from the frame
+        
+        Parameters:
+        connection: Database of the app
+        """
         self.accountsHolder = ttk.Frame(self.canvas)
         self.canvas.create_window((0, 0), window = self.accountsHolder, anchor = "nw")
         
@@ -466,6 +504,11 @@ class ProfileFrame(tk.Frame):
         self.canvas.configure(scrollregion = self.canvas.bbox("all"))
         
     def _addAccount(self, connection):
+        """Creates a pop-up window for the user to add a account
+        
+        Parameters:
+        connection: Used to save the account information to the database
+        """
         popup = tk.Toplevel()
         popup.title("Add Account")
 
@@ -542,6 +585,7 @@ class ProfileFrame(tk.Frame):
                         column = 0, columnspan = 3)
     
     def _reloadAccounts(self, connection):
+        """Destroy and makes the frame again to reaload it"""
         self.accountsHolder.destroy()
         self._loadAccounts(connection)
     
