@@ -1,2 +1,3 @@
-from src.utils.database_handler import *
-from src.utils.hash_info import *
+from src.utils.databasehandler import *
+from src.utils.hashhandler import *
+from src.utils.hinthandler import *

@@ -9,12 +9,12 @@ from src.loginframe import *
 from src.registerframe import *
 
 
-class PasswordManager(tk.Tk):
+class PasswordFortress(tk.Tk):
     """Main class of the app, starts the database and frames"""
     def __init__(self):
         tk.Tk.__init__(self)
 
-        self.title("Password Manager")
+        self.title("PasswordFortress")
         self.geometry("300x250")
         self.eval("tk::PlaceWindow . center")
         self.iconbitmap("assets/Key.ico")
@@ -38,7 +38,8 @@ class PasswordManager(tk.Tk):
                          sticky = "nsew")
         self.frames[LoginFrame.__name__] = login_frame
 
-        self.change_frame("LoginFrame")
+        START_FRAME = "LoginFrame"
+        self.change_frame(START_FRAME)
 
         self.mainloop()
 

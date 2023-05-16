@@ -28,6 +28,7 @@ def set_database(connection: sqlite3.Connection) -> None:
                        id INTEGER PRIMARY KEY AUTOINCREMENT,
                        nickname VARCHAR NOT NULL,
                        username VARCHAR UNIQUE NOT NULL,
+                       salt NOT NULL,
                        password VARCHAR NOT NULL)""")
         
         cursor.execute("""CREATE TABLE IF NOT EXISTS accounts (
@@ -46,7 +47,7 @@ def set_database(connection: sqlite3.Connection) -> None:
 
 
 def user_exists(search: str, connection: sqlite3.Connection) -> tuple or False:
-    """Checks if a user exists on the database
+    """Checks if a user exists on the database based on its username
     
     Parameters:
     search(str): User to be searched for in the database
@@ -68,7 +69,7 @@ def user_exists(search: str, connection: sqlite3.Connection) -> tuple or False:
     return result
 
 
-def get_accounts(userId: int, connection: sqlite3.Connection) -> tuple:
+def get_accounts(user_id: int, connection: sqlite3.Connection) -> tuple:
     """Gets all the accounts of a given user
 
     Parameters:
@@ -79,7 +80,7 @@ def get_accounts(userId: int, connection: sqlite3.Connection) -> tuple:
     accounts(tuple): All the accounts from the user in a tuple
     """
     cursor = connection.cursor()
-    cursor.execute("SELECT * FROM accounts WHERE user_id = ?", (userId,))
+    cursor.execute("SELECT * FROM accounts WHERE user_id = ?", (user_id,))
     accounts = cursor.fetchall()
     
     cursor.close()

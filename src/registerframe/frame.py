@@ -1,5 +1,6 @@
 import tkinter as tk
 from src.utils import *
+from src.settings import *
 
 
 class RegisterFrame(tk.Frame):
@@ -14,104 +15,62 @@ class RegisterFrame(tk.Frame):
     _registerUser: Registers a user if all the "if's" are passed and returns to the LoginFrame
     _return: Returns to the LoginFrame and clears all the widgets from this one
     """
-    def __init__(self, connection, master, controller):
-        tk.Frame.__init__(self, master)
-        self.columnconfigure(0, minsize=100)
-        self.columnconfigure(1, minsize=200)
-        
-        # Header Label
-        self.header = tk.Label(self,
-                     text = "Register an Account!",
-                     font = ("Arial", 12, "bold"))
-        self.header.grid(pady = 20,
-                  padx = 10,
-                  row = 0,
-                  column = 0, columnspan = 2,
-                  sticky="nsew")
-        
-        # Nickname label and entry
-        nicknameLabel = tk.Label(self,
-                              text = "Nickname:",
-                              font = ("Arial", 9, "bold"))
-        nicknameLabel.grid(pady = 5,
-                           row = 1,
-                           column = 0,
-                           sticky = "e")
-        
-        self.nicknameEntry = tk.Entry(self)
-        self.nicknameEntry.grid(pady = 5,
-                           row = 1,
-                           column = 1,
-                           sticky = "w")
-        
-        # Set focus to next box
-        self.nicknameEntry.bind("<Return>", lambda event: self.usernameEntry.focus_set())
+    def __init__(self, connection: sqlite3.Connection, master: tk.Frame, window: tk.Tk):
+        tk.Frame.__init__(self, master, bg = BG_APP)
 
-        # Username label and entry
-        usernameLabel = tk.Label(self,
-                              text = "Username:",
-                              font = ("Arial", 9, "bold"))
-        usernameLabel.grid(pady = 5,
-                           row = 2,
-                           column = 0,
-                           sticky = "e")
+        widgets_holder = tk.Frame(self,
+                                  bg = BG_APP)
+        widgets_holder.pack(expand = True)
+
+        header = tk.Label(widgets_holder,
+                          text = "Welcome to PasswordFortress!",
+                          font = ("Arial", 12, "bold"),
+                          fg = FG,
+                          bg = BG_APP)
+        header.pack(anchor = "center",
+                    pady = 10)
+
+        nickname = tk.Entry(widgets_holder,
+                            font = ("Arial", 12),
+                            fg = HINT_FG,
+                            bg = BG_APP)
+        nickname.pack(anchor = "center",
+                      pady = 5)
+        NICKNAME_HINT = "Enter a Nickname"
+        nickname.insert(0, NICKNAME_HINT)
+        nickname.bind('<FocusIn>', lambda event: entry_focus_in(nickname, NICKNAME_HINT))
+        nickname.bind('<FocusOut>', lambda event: entry_focus_out(nickname, NICKNAME_HINT))
+
+        username = tk.Entry(widgets_holder,
+                            font = ("Arial", 12),
+                            fg = HINT_FG,
+                            bg = BG_APP)
+        username.pack(anchor = "center",
+                      pady = 5)
+        USERNAME_HINT = "Enter a Username"
+        username.insert(0, USERNAME_HINT)
+        username.bind('<FocusIn>', lambda event: entry_focus_in(username, USERNAME_HINT))
+        username.bind('<FocusOut>', lambda event: entry_focus_out(username, USERNAME_HINT))
+
+        password = tk.Entry(widgets_holder,
+                            font = ("Arial", 12),
+                            fg = HINT_FG,
+                            bg = BG_APP)
+        password.pack(anchor = "center",
+                      pady = 5)
+        PASSWORD_HINT = "Enter a Password"
+        password.insert(0, PASSWORD_HINT)
+        password.bind('<FocusIn>', lambda event: entry_focus_in(password, PASSWORD_HINT))
+        password.bind('<FocusOut>', lambda event: entry_focus_out(password, PASSWORD_HINT))
         
-        self.usernameEntry = tk.Entry(self)
-        self.usernameEntry.grid(pady = 5,
-                           row = 2,
-                           column = 1,
-                           sticky = "w")
-        self.usernameEntry.bind("<Return>", lambda event: self.passwordEntry.focus_set())
+        register = tk.Button(widgets_holder,
+                          text = "register",
+                          font = ("Arial", 12),
+                          fg = FG,
+                          bg = BG_APP)
+        register.pack(anchor = "center",
+                   pady = 10)
 
-        # Password label and entry
-        passwordLabel = tk.Label(self,
-                              text = "Password:",
-                              font = ("Arial", 9, "bold"))
-        passwordLabel.grid(pady = 5,
-                           row = 3,
-                           column = 0,
-                           sticky = "e")
-        
-        self.passwordEntry = tk.Entry(self, show = "*")  # Password box only shows * insted of the password
-        self.passwordEntry.grid(pady = 5,
-                           row = 3,
-                           column = 1,
-                           sticky = "w")
-        self.passwordEntry.bind("<Return>", lambda event: self.confirmPasswordEntry.focus_set())
-
-        # Password Confirmation label and entry
-        confirmPasswordLabel = tk.Label(self,
-                                     text = "Confirm\nPassword:",
-                                     font = ("Arial", 9, "bold"))
-        confirmPasswordLabel.grid(pady = 5,
-                                  row = 4,
-                                  column = 0,
-                                  sticky = "e")
-        
-        self.confirmPasswordEntry = tk.Entry(self, show = "*")  # Password confirmation box only shows *
-        self.confirmPasswordEntry.grid(pady = 5,
-                                  row = 4,
-                                  column = 1,
-                                  sticky = "w")
-
-        # Button and bind responsable for calling the register function
-        self.confirmPasswordEntry.bind("<Return>", lambda event: self._registerUser(controller, connection))
-        RegisterButton = tk.Button(self,
-                                text = "Register")
-        RegisterButton.grid(row = 5,
-                            column = 0, columnspan = 2,
-                            sticky= "ns")
-        RegisterButton.bind("<Button-1>", lambda event: self._registerUser(controller, connection))
-
-        # Goes back to the login screen without registering the user
-        backLabel = tk.Label(self,
-                          text = "Back",
-                          font = ("Arial", 7, "bold", "underline"),
-                          fg = "Blue")
-        backLabel.bind("<Button-1>", lambda event: self._return(controller))
-        backLabel.grid(row = 5,
-                       column= 0,
-                       sticky = "ew")
 
     def _registerUser(self, controller, connection):
         """Registers a user if all the "if's" are passed and returns to the LoginFrame
