@@ -1,8 +1,7 @@
 import tkinter as tk
 from src.settings import *
 from src.utils import *
-from src.profileframe import *
-from src.loginframe.utils import *
+from src.loginframe.loginuser import *
 
 class LoginFrame(tk.Frame):
     """Frame responsable for login a user in the app
@@ -13,7 +12,7 @@ class LoginFrame(tk.Frame):
     profile_frame(tk.frame): Frame of the profile
     window(tk.Tk): Window of the app
     """
-    def __init__(self, connection: sqlite3.Connection, master: tk.Frame, profile_frame: ProfileFrame, window: tk.Tk):
+    def __init__(self, connection: sqlite3.Connection, master: tk.Frame, profile_frame: tk.Frame, window: tk.Tk):
         tk.Frame.__init__(self, master, bg = BG_APP)
 
         widgets_holder = tk.Frame(self,
@@ -34,7 +33,7 @@ class LoginFrame(tk.Frame):
                          fg = FG,
                          bg = BG_APP)
         guide.pack(anchor = "center",
-                   pady = 5)
+                   pady = 10)
 
         username = tk.Entry(widgets_holder,
                             font = LOGIN_WIDGETS_FONT,
@@ -56,7 +55,7 @@ class LoginFrame(tk.Frame):
         password.insert(0, LOGIN_PASSWORD_HINT)
         password.bind("<FocusIn>", lambda event: entry_focus_in(password, LOGIN_PASSWORD_HINT))
         password.bind("<FocusOut>", lambda event: entry_focus_out(password, LOGIN_PASSWORD_HINT))
-        password.bind("<Return>", lambda event: login_User(username, password, guide, connection, window))
+        password.bind("<Return>", lambda event: login_User(username.get(), password.get(), guide, connection, window))
 
         WIDGETS = {LOGIN_GUIDE_TEXT: guide,
                    LOGIN_USERNAME_HINT: username,
@@ -67,7 +66,7 @@ class LoginFrame(tk.Frame):
                              font = LOGIN_REGISTER_FONT,
                              fg = LOGIN_REGISTER_FG,
                              bg = BG_APP,
-                             command = lambda: (change_frame(WIDGETS, "RegisterFrame", window), login.focus()))
+                             command = lambda: (window.change_frame("RegisterFrame"), clear_frame(WIDGETS), login.focus()))
         register.configure(relief = tk.FLAT)
         register.pack(anchor = "w",
                       pady = 5)

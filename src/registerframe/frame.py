@@ -1,19 +1,16 @@
 import tkinter as tk
 from src.utils import *
 from src.settings import *
+from src.registerframe.registeruser import *
 
 
 class RegisterFrame(tk.Frame):
     """Frame responsable for registering a user in the app
 
     Attributes:
-    Connection: Database of the app
-    master: Widget/window where this frame will be loaded
-    controller: Main class of the app
-
-    Methods:
-    _registerUser: Registers a user if all the "if's" are passed and returns to the LoginFrame
-    _return: Returns to the LoginFrame and clears all the widgets from this one
+    Connection(sqlite3.Connection): Database of the app
+    master(tk.Frame): Frame where this frame will be loaded
+    window(tk.Tk): Window of the app
     """
     def __init__(self, connection: sqlite3.Connection, master: tk.Frame, window: tk.Tk):
         tk.Frame.__init__(self, master, bg = BG_APP)
@@ -23,102 +20,85 @@ class RegisterFrame(tk.Frame):
         widgets_holder.pack(expand = True)
 
         header = tk.Label(widgets_holder,
-                          text = "Welcome to PasswordFortress!",
-                          font = ("Arial", 12, "bold"),
+                          text = REGISTER_HEADER_TEXT,
+                          font = REGISTER_HEADER_FONT,
                           fg = FG,
                           bg = BG_APP)
         header.pack(anchor = "center",
                     pady = 10)
 
+        guide = tk.Label(widgets_holder,
+                         text = REGISTER_GUIDE_TEXT,
+                         font = REGISTER_WIDGETS_FONT,
+                         fg = FG,
+                         bg = BG_APP)
+        guide.pack(anchor = "center",
+                   pady = 10)
+
         nickname = tk.Entry(widgets_holder,
-                            font = ("Arial", 12),
+                            font = REGISTER_WIDGETS_FONT,
                             fg = HINT_FG,
                             bg = BG_APP)
         nickname.pack(anchor = "center",
                       pady = 5)
-        NICKNAME_HINT = "Enter a Nickname"
-        nickname.insert(0, NICKNAME_HINT)
-        nickname.bind('<FocusIn>', lambda event: entry_focus_in(nickname, NICKNAME_HINT))
-        nickname.bind('<FocusOut>', lambda event: entry_focus_out(nickname, NICKNAME_HINT))
+        nickname.insert(0, REGISTER_NICKNAME_HINT)
+        nickname.bind("<FocusIn>", lambda event: entry_focus_in(nickname, REGISTER_NICKNAME_HINT))
+        nickname.bind("<FocusOut>", lambda event: entry_focus_out(nickname, REGISTER_NICKNAME_HINT))
+        nickname.bind("<Return>", lambda event: username.focus())
 
         username = tk.Entry(widgets_holder,
-                            font = ("Arial", 12),
+                            font = REGISTER_WIDGETS_FONT,
                             fg = HINT_FG,
                             bg = BG_APP)
         username.pack(anchor = "center",
                       pady = 5)
-        USERNAME_HINT = "Enter a Username"
-        username.insert(0, USERNAME_HINT)
-        username.bind('<FocusIn>', lambda event: entry_focus_in(username, USERNAME_HINT))
-        username.bind('<FocusOut>', lambda event: entry_focus_out(username, USERNAME_HINT))
+        username.insert(0, REGISTER_USERNAME_HINT)
+        username.bind("<FocusIn>", lambda event: entry_focus_in(username, REGISTER_USERNAME_HINT))
+        username.bind("<FocusOut>", lambda event: entry_focus_out(username, REGISTER_USERNAME_HINT))
+        username.bind("<Return>", lambda event: password.focus())
 
         password = tk.Entry(widgets_holder,
-                            font = ("Arial", 12),
+                            font = REGISTER_WIDGETS_FONT,
                             fg = HINT_FG,
                             bg = BG_APP)
         password.pack(anchor = "center",
                       pady = 5)
-        PASSWORD_HINT = "Enter a Password"
-        password.insert(0, PASSWORD_HINT)
-        password.bind('<FocusIn>', lambda event: entry_focus_in(password, PASSWORD_HINT))
-        password.bind('<FocusOut>', lambda event: entry_focus_out(password, PASSWORD_HINT))
+        password.insert(0, REGISTER_PASSWORD_HINT)
+        password.bind("<FocusIn>", lambda event: entry_focus_in(password, REGISTER_PASSWORD_HINT))
+        password.bind("<FocusOut>", lambda event: entry_focus_out(password, REGISTER_PASSWORD_HINT))
+        password.bind("<Return>", lambda event: confirm_password.focus())
+
+        confirm_password = tk.Entry(widgets_holder,
+                            font = REGISTER_WIDGETS_FONT,
+                            fg = HINT_FG,
+                            bg = BG_APP)
+        confirm_password.pack(anchor = "center",
+                      pady = 5)
+        confirm_password.insert(0, REGISTER_CONFIRM_PASSWORD_HINT)
+        confirm_password.bind("<FocusIn>", lambda event: entry_focus_in(confirm_password, REGISTER_CONFIRM_PASSWORD_HINT))
+        confirm_password.bind("<FocusOut>", lambda event: entry_focus_out(confirm_password, REGISTER_CONFIRM_PASSWORD_HINT))
+        confirm_password.bind("<Return>", lambda event: (back.focus(), register_user(nickname, username, password, confirm_password, WIDGETS, guide, connection)))
         
-        register = tk.Button(widgets_holder,
-                          text = "register",
-                          font = ("Arial", 12),
-                          fg = FG,
-                          bg = BG_APP)
-        register.pack(anchor = "center",
-                   pady = 10)
+        WIDGETS = {REGISTER_GUIDE_TEXT: guide,
+                   REGISTER_NICKNAME_HINT: nickname,
+                   REGISTER_USERNAME_HINT: username,
+                   REGISTER_PASSWORD_HINT: password,
+                   REGISTER_CONFIRM_PASSWORD_HINT: confirm_password}
 
         back = tk.Button(widgets_holder,
-                          text = "back",
-                          font = ("Arial", 12),
-                          fg = FG,
-                          bg = BG_APP,
-                          command = lambda: window.change_frame("LoginFrame"))
+                         text = REGISTER_BACK_TEXT,
+                         font = REGISTER_BACK_FONT,
+                         fg = REGISTER_BACK_FG,
+                         bg = BG_APP,
+                         command = lambda: (window.change_frame("LoginFrame"), clear_frame(WIDGETS)))
         back.configure(relief = tk.FLAT)
-        back.pack(anchor = "center",
-                   pady = 10)
-
-    def _registerUser(self, controller, connection):
-        """Registers a user if all the "if's" are passed and returns to the LoginFrame
-
-        Parameters:
-        controller: Main class of the app
-        connection: database of the app
-        """
-        # If a box is left empty
-        if self.nicknameEntry.get() == "" or self.usernameEntry.get() == "" or self.passwordEntry.get() == "":
-            self.header.config(text = "Fill All The Boxes!")
-            return
-
-        # If a username is already in use
-        if user_exists(username := hash_info(self.usernameEntry.get()), connection) != False:
-            self.header.config(text = "Username Unavailable!")
-            return
-
-        # If password and the password confirmation dont match
-        if self.confirmPasswordEntry.get() != self.passwordEntry.get():
-            self.header.config(text = "Passwords Don't Match!")
-            return
-
-        # Registers the user if everything is ok
-        nickname = self.nicknameEntry.get()
-        password = hash_info(self.passwordEntry.get())
-        cursor = connection.cursor()
-        cursor.execute("INSERT INTO users (nickname, username, password) VALUES (?, ?, ?)", (nickname, username, password))
-        connection.commit()
-        cursor.close()
-        self._return(controller)
-
-    def _return(self, controller):
-        """Returns to the LoginFrame and clears all the widgets from this one
+        back.pack(anchor = "w",
+                  pady = 5)
         
-        Parameters:
-        Controller: Main class of the app, used to call the function to change frame
-        """
-        for selectEntry in (self.nicknameEntry, self.usernameEntry, self.passwordEntry, self.confirmPasswordEntry):
-            selectEntry.delete(0, tk.END)
-        self.header.config(text = "Register an Account!")
-        controller.change_frame("LoginFrame")
+        register = tk.Button(widgets_holder,
+                             text = REGISTER_SING_UP_TEXT,
+                             font = REGISTER_WIDGETS_FONT,
+                             fg = FG,
+                             bg = BG_APP,
+                             command = lambda: register_user(nickname, username, password, confirm_password, WIDGETS, guide, connection))
+        register.pack(anchor = "center")

@@ -7,6 +7,7 @@ import tkinter as tk
 from src.utils import *
 from src.loginframe import *
 from src.registerframe import *
+from src.profileframe import *
 
 
 class PasswordFortress(tk.Tk):

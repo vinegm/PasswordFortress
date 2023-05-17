@@ -29,7 +29,7 @@ def set_database(connection: sqlite3.Connection) -> None:
                        nickname VARCHAR NOT NULL,
                        username VARCHAR UNIQUE NOT NULL,
                        salt NOT NULL,
-                       password VARCHAR NOT NULL)""")
+                       hashed_password VARCHAR NOT NULL)""")
         
         cursor.execute("""CREATE TABLE IF NOT EXISTS accounts (
                        id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -42,6 +42,23 @@ def set_database(connection: sqlite3.Connection) -> None:
         
         connection.commit()
     
+    cursor.close()
+    return
+
+
+def register_new_user(nickname: str, username: str, salt: bytes, password: str, connection: sqlite3.Connection):
+    """Registers a new user to the database
+    
+    Parameters:
+    nickname(str): nickname of the user
+    username(str): username of the user
+    salt(bytes): salt used to hash the user password
+    password(str): hashed password of the user
+    connection(slite3.Connection):
+    """
+    cursor = connection.cursor()
+    cursor.execute("INSERT INTO users (nickname, username, salt, hashed_password) VALUES (?, ?, ?, ?)", (nickname, username, salt, password))
+    connection.commit()
     cursor.close()
     return
 
