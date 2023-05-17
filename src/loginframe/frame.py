@@ -10,6 +10,7 @@ class LoginFrame(tk.Frame):
     Attributes:
     Connection(sqlite3.Connection): Database of the app
     master(tk.frame): Frame where this frame will be loaded
+    profile_frame(tk.frame): Frame of the profile
     window(tk.Tk): Window of the app
     """
     def __init__(self, connection: sqlite3.Connection, master: tk.Frame, profile_frame: ProfileFrame, window: tk.Tk):
@@ -20,49 +21,61 @@ class LoginFrame(tk.Frame):
         widgets_holder.pack(expand = True)
 
         header = tk.Label(widgets_holder,
-                          text = "Welcome to PasswordFortress!",
-                          font = ("Arial", 12, "bold"),
+                          text = LOGIN_HEADER_TEXT,
+                          font = LOGIN_HEADER_FONT,
                           fg = FG,
                           bg = BG_APP)
         header.pack(anchor = "center",
                     pady = 10)
 
+        guide = tk.Label(widgets_holder,
+                         text = LOGIN_GUIDE_TEXT,
+                         font = LOGIN_WIDGETS_FONT,
+                         fg = FG,
+                         bg = BG_APP)
+        guide.pack(anchor = "center",
+                   pady = 5)
+
         username = tk.Entry(widgets_holder,
-                            font = ("Arial", 12),
+                            font = LOGIN_WIDGETS_FONT,
                             fg = HINT_FG,
                             bg = BG_APP)
         username.pack(anchor = "center",
                       pady = 5)
-        USERNAME_HINT = "Enter Your Username"
-        username.insert(0, USERNAME_HINT)
-        username.bind('<FocusIn>', lambda event: entry_focus_in(username, USERNAME_HINT))
-        username.bind('<FocusOut>', lambda event: entry_focus_out(username, USERNAME_HINT))
+        username.insert(0, LOGIN_USERNAME_HINT)
+        username.bind("<FocusIn>", lambda event: entry_focus_in(username, LOGIN_USERNAME_HINT))
+        username.bind("<FocusOut>", lambda event: entry_focus_out(username, LOGIN_USERNAME_HINT))
+        username.bind("<Return>", lambda event: password.focus())
 
         password = tk.Entry(widgets_holder,
-                            font = ("Arial", 12),
+                            font = LOGIN_WIDGETS_FONT,
                             fg = HINT_FG,
                             bg = BG_APP)
         password.pack(anchor = "center",
                       pady = 5)
-        PASSWORD_HINT = "Enter Your Password"
-        password.insert(0, PASSWORD_HINT)
-        password.bind('<FocusIn>', lambda event: entry_focus_in(password, PASSWORD_HINT))
-        password.bind('<FocusOut>', lambda event: entry_focus_out(password, PASSWORD_HINT))
+        password.insert(0, LOGIN_PASSWORD_HINT)
+        password.bind("<FocusIn>", lambda event: entry_focus_in(password, LOGIN_PASSWORD_HINT))
+        password.bind("<FocusOut>", lambda event: entry_focus_out(password, LOGIN_PASSWORD_HINT))
+        password.bind("<Return>", lambda event: login_User(username, password, guide, connection, window))
 
+        WIDGETS = {LOGIN_GUIDE_TEXT: guide,
+                   LOGIN_USERNAME_HINT: username,
+                   LOGIN_PASSWORD_HINT: password}
+
+        register = tk.Button(widgets_holder,
+                             text = LOGIN_REGISTER_TEXT,
+                             font = LOGIN_REGISTER_FONT,
+                             fg = LOGIN_REGISTER_FG,
+                             bg = BG_APP,
+                             command = lambda: (change_frame(WIDGETS, "RegisterFrame", window), login.focus()))
+        register.configure(relief = tk.FLAT)
+        register.pack(anchor = "w",
+                      pady = 5)
+        
         login = tk.Button(widgets_holder,
-                          text = "Login",
-                          font = ("Arial", 12),
+                          text = LOGIN_LOG_IN_TEXT,
+                          font = LOGIN_WIDGETS_FONT,
                           fg = FG,
                           bg = BG_APP,
-                          command = lambda: login_User(username, password, connection, window))
-        login.pack(anchor = "center",
-                   pady = 10)
-        
-        register = tk.Button(widgets_holder,
-                          text = "register",
-                          font = ("Arial", 12),
-                          fg = FG,
-                          bg = BG_APP)
-                          #command = lambda: register_User(username, password, connection, window))
-        register.pack(anchor = "center",
-                   pady = 10)
+                          command = lambda: login_User(username, password, guide, connection, window))
+        login.pack(anchor = "center")

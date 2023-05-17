@@ -71,6 +71,15 @@ class RegisterFrame(tk.Frame):
         register.pack(anchor = "center",
                    pady = 10)
 
+        back = tk.Button(widgets_holder,
+                          text = "back",
+                          font = ("Arial", 12),
+                          fg = FG,
+                          bg = BG_APP,
+                          command = lambda: window.change_frame("LoginFrame"))
+        back.configure(relief = tk.FLAT)
+        back.pack(anchor = "center",
+                   pady = 10)
 
     def _registerUser(self, controller, connection):
         """Registers a user if all the "if's" are passed and returns to the LoginFrame
