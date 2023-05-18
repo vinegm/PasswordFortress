@@ -2,7 +2,7 @@ from src.utils import *
 from src.settings import *
 
 
-def register_user(nickname_entry: tk.Entry, username_entry: tk.Entry, password_entry: tk.Entry, confirm_password_entry: tk.Entry, widgets, guide, connection):
+def register_user(nickname_entry: tk.Entry, username_entry: tk.Entry, password_entry: tk.Entry, confirm_password_entry: tk.Entry, widgets: dict, guide, connection):
     """Registers a user if all conditions are passed
 
     Parameters:
@@ -10,6 +10,8 @@ def register_user(nickname_entry: tk.Entry, username_entry: tk.Entry, password_e
     username_entry(tk.Entry): Entry that holds the username of the user
     password_entry(tk.Entry): Entry that holds the password of the user
     confirm_password_entry(tk.Entry): Entry that holds the confirmation from the password
+    widgets(dict): Dict cointeining the widgets of the frame for clearing
+    guide(tk.Label): Label to give feedback to the user
     connection(sqlite3.Connectio): database of the app
     """
     nickname, username, password, confirm_password = nickname_entry.get(), username_entry.get(), password_entry.get(), confirm_password_entry.get()

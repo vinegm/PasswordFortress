@@ -9,10 +9,9 @@ class LoginFrame(tk.Frame):
     Attributes:
     Connection(sqlite3.Connection): Database of the app
     master(tk.frame): Frame where this frame will be loaded
-    profile_frame(tk.frame): Frame of the profile
     window(tk.Tk): Window of the app
     """
-    def __init__(self, connection: sqlite3.Connection, master: tk.Frame, profile_frame: tk.Frame, window: tk.Tk):
+    def __init__(self, connection: sqlite3.Connection, master: tk.Frame, window: tk.Tk):
         tk.Frame.__init__(self, master, bg = BG_APP)
 
         widgets_holder = tk.Frame(self,
@@ -55,7 +54,7 @@ class LoginFrame(tk.Frame):
         password.insert(0, LOGIN_PASSWORD_HINT)
         password.bind("<FocusIn>", lambda event: entry_focus_in(password, LOGIN_PASSWORD_HINT))
         password.bind("<FocusOut>", lambda event: entry_focus_out(password, LOGIN_PASSWORD_HINT))
-        password.bind("<Return>", lambda event: login_User(username.get(), password.get(), guide, connection, window))
+        password.bind("<Return>", lambda event: (login_User(username, password, WIDGETS, guide, login, connection, window)))
 
         WIDGETS = {LOGIN_GUIDE_TEXT: guide,
                    LOGIN_USERNAME_HINT: username,
@@ -76,5 +75,5 @@ class LoginFrame(tk.Frame):
                           font = LOGIN_WIDGETS_FONT,
                           fg = FG,
                           bg = BG_APP,
-                          command = lambda: login_User(username, password, guide, connection, window))
+                          command = lambda: (login_User(username, password, WIDGETS, guide, login, connection, window)))
         login.pack(anchor = "center")

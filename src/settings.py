@@ -25,6 +25,10 @@ LOGIN_LOG_IN_TEXT = "Log In"
 INVALID_LOGIN = "This Login is Invalid."
 INVALID_LOGIN_FG = "Red"
 
+# Text and text color for a invalid login
+VALID_LOGIN = "Login in..."
+VALID_LOGIN_FG = "Green"
+
 # Settings of the register button
 LOGIN_REGISTER_TEXT = "Register"
 LOGIN_REGISTER_FONT = (STD_FONT, STD_SIZE_FONT-2, "underline")
@@ -51,3 +55,7 @@ REGISTER_BACK_FG = "Blue"
 
 REGISTER_SUCCESS_FG = "Green"
 REGISTER_ERROR_FG = "Red"
+
+# Register Frame settings
+# Header font
+PROFILE_HEADER_FONT = (STD_FONT, STD_SIZE_FONT+8, "bold")

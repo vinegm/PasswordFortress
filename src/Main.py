@@ -31,13 +31,7 @@ class PasswordFortress(tk.Tk):
         frames_holder.rowconfigure(0, weight = 1)
 
         self.frames = {}
-        self.initialize_frames(connection, frames_holder, ProfileFrame, RegisterFrame)
-
-        login_frame = LoginFrame(connection, frames_holder, self.frames["ProfileFrame"], self)
-        login_frame.grid(row = 0,
-                         column = 0,
-                         sticky = "nsew")
-        self.frames[LoginFrame.__name__] = login_frame
+        self.initialize_frames(connection, frames_holder, ProfileFrame, RegisterFrame, LoginFrame)
 
         START_FRAME = "LoginFrame"
         self.change_frame(START_FRAME)
