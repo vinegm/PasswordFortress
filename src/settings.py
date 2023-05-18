@@ -59,3 +59,9 @@ REGISTER_ERROR_FG = "Red"
 # Register Frame settings
 # Header font
 PROFILE_HEADER_FONT = (STD_FONT, STD_SIZE_FONT+8, "bold")
+
+PROFILE_WIDGETS_FONT = (STD_FONT, STD_SIZE_FONT)
+
+PROFILE_NEW_PLATAFORM_HINT = "Enter the Plataform"
+PROFILE_NEW_LOGIN_HINT = "Enter the Login"
+PROFILE_NEW_PASSWORD_HINT = "Enter the Password"

@@ -20,27 +20,24 @@ def set_database(connection: sqlite3.Connection) -> None:
     connection(sqlite3.Connection): SQLite3 connection to a database
     """
     cursor = connection.cursor()
-    cursor.execute("SELECT count(*) FROM sqlite_master WHERE type='table'")
-    result = cursor.fetchone()
-
-    if result[0] == 0:
-        cursor.execute("""CREATE TABLE IF NOT EXISTS users (
-                       id INTEGER PRIMARY KEY AUTOINCREMENT,
-                       nickname VARCHAR NOT NULL,
-                       username VARCHAR UNIQUE NOT NULL,
-                       salt NOT NULL,
-                       hashed_password VARCHAR NOT NULL)""")
-        
-        cursor.execute("""CREATE TABLE IF NOT EXISTS accounts (
-                       id INTEGER PRIMARY KEY AUTOINCREMENT, 
-                       plataform VARCHAR NOT NULL,
-                       login VARCHAR NOT NULL,
-                       password VARCHAR NOT NULL,
-                       logo BLOB,
-                       user_id INTEGER,
-                       FOREIGN KEY (user_id) REFERENCES users(id))""")
-        
-        connection.commit()
+    
+    cursor.execute("""CREATE TABLE IF NOT EXISTS users (
+                      id INTEGER PRIMARY KEY AUTOINCREMENT,
+                      nickname VARCHAR NOT NULL,
+                      username VARCHAR UNIQUE NOT NULL,
+                      salt NOT NULL,
+                      hashed_password VARCHAR NOT NULL)""")
+    
+    cursor.execute("""CREATE TABLE IF NOT EXISTS accounts (
+                      id INTEGER PRIMARY KEY AUTOINCREMENT, 
+                      plataform VARCHAR NOT NULL,
+                      login VARCHAR NOT NULL,
+                      password VARCHAR NOT NULL,
+                      logo BLOB NOT NULL,
+                      user_id INTEGER,
+                      FOREIGN KEY (user_id) REFERENCES users(id))""")
+    
+    connection.commit()
     
     cursor.close()
     return
@@ -57,9 +54,12 @@ def register_new_user(nickname: str, username: str, salt: bytes, password: str, 
     connection(slite3.Connection):
     """
     cursor = connection.cursor()
+
     cursor.execute("INSERT INTO users (nickname, username, salt, hashed_password) VALUES (?, ?, ?, ?)", (nickname, username, salt, password))
     connection.commit()
+
     cursor.close()
+
     return
 
 
@@ -86,6 +86,23 @@ def user_exists(search: str, connection: sqlite3.Connection) -> tuple or False:
     return result
 
 
+def save_account(account: list, connection: sqlite3.Connection):
+    """Saves a new encrypted user account to the database
+    
+    Parameters:
+    Account(list): List with the information from the account
+    connection(sqlite3.Connection): Connection to the database
+    """
+    cursor = connection.cursor()
+
+    cursor.execute("INSERT INTO accounts (plataform, login, password, logo, user_id) VALUES (?, ?, ?, ?, ?)", (account))
+    connection.commit()
+
+    cursor.close()
+
+    return
+
+
 def get_accounts(user_id: int, connection: sqlite3.Connection) -> tuple:
     """Gets all the accounts of a given user
 
@@ -97,6 +114,7 @@ def get_accounts(user_id: int, connection: sqlite3.Connection) -> tuple:
     accounts(tuple): All the accounts from the user in a tuple
     """
     cursor = connection.cursor()
+
     cursor.execute("SELECT * FROM accounts WHERE user_id = ?", (user_id,))
     accounts = cursor.fetchall()
     

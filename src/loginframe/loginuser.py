@@ -33,10 +33,11 @@ def login_User(username_entry: tk.Entry, password_entry: tk.Entry, widgets: dict
     guide.configure(text = VALID_LOGIN,
                     fg = VALID_LOGIN_FG)
 
-    key = KDF(password, user_info[3]).hex()
+    key = KDF(password, user_info[3])
     
     # Passes the user info into the profile frame
     window.frames["ProfileFrame"].user = [user_info[0], user_info[1], key]
+    window.frames["ProfileFrame"].reload(True)
 
     login.focus()
     clear_frame(widgets)
