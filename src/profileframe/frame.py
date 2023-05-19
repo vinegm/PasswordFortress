@@ -1,10 +1,6 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter import filedialog
-from PIL import Image, ImageTk
-from io import BytesIO
 from src.utils import *
-from src.profileframe.accountshandler import *
+from src.profileframe.utils import *
 
 
 class ProfileFrame(tk.Frame):
@@ -52,13 +48,15 @@ class ProfileFrame(tk.Frame):
         logoff.grid(row = 0,
                     column = 0,
                     sticky = "w")
-        
+
+        create_separator(widgets_holder)
+
         accounts = tk.Frame(widgets_holder,
                             bg = BG_APP)
         accounts.pack(anchor = "center",
                       fill = "x")
         
-        self.accounts_loader = lambda: populate_accounts(accounts, self.user[0], connection)
+        self.accounts_loader = lambda: populate_accounts(accounts, self.user[0], self.user[2], connection)
         self.accounts_holder = self.accounts_loader()
 
         add = tk.Button(widgets_holder,

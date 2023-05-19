@@ -16,7 +16,6 @@ class PasswordFortress(tk.Tk):
         tk.Tk.__init__(self)
 
         self.title("PasswordFortress")
-        self.geometry("300x250")
         self.eval("tk::PlaceWindow . center")
         self.iconbitmap("assets/Key.ico")
 

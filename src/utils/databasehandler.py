@@ -33,7 +33,7 @@ def set_database(connection: sqlite3.Connection) -> None:
                       plataform VARCHAR NOT NULL,
                       login VARCHAR NOT NULL,
                       password VARCHAR NOT NULL,
-                      logo BLOB NOT NULL,
+                      logo BLOB,
                       user_id INTEGER,
                       FOREIGN KEY (user_id) REFERENCES users(id))""")
     

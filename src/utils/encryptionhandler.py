@@ -9,7 +9,7 @@ def encrypt_data(data: str, key: bytes) -> bytes:
     key(bytes): Key that will be used in the encryption
 
     Returns:
-    encrypted_data(bytes): The encrypted data with the key
+    encrypted_data(bytes): The encrypted data
     """
     cipher = Fernet(key)
     encrypted_data = cipher.encrypt(data.encode())
@@ -17,5 +17,17 @@ def encrypt_data(data: str, key: bytes) -> bytes:
     return encrypted_data
 
 
-def decrypt_data():
-    return
+def decrypt_data(data: bytes, key: bytes) -> str:
+    """decrypts the given data with the given key
+
+    Parameters:
+    data(bytes): Data that will be decrypted
+    key(bytes): Key that will be used in the dencryption
+
+    Returns:
+    encrypted_data(str): The dencrypted data
+    """
+    cipher = Fernet(key)
+    decrypted_data= cipher.decrypt(data)
+
+    return decrypted_data

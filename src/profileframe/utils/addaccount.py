@@ -1,29 +1,8 @@
 import tkinter as tk
-from src.settings import *
+from tkinter import filedialog
 from src.utils import *
-
-
-def populate_accounts(master: tk.Frame, user_id: int, connection) -> tk.Frame:
-    """Populates the profile frame with the users accounts
-    
-    Parameters:
-    master(tk.Frame): Frame that will hold the widgets
-    user_id(int): Id of the current user
-    connection(sqlite3.Connection): Connection to the database
-
-    Returns:
-    accounts_holder(tk.Frame): Frame containing all the widgets from the user accounts
-    """
-    if user_id == None:
-        return None
-    
-    accounts_data = get_accounts(user_id, connection)
-
-    for i, account in enumerate(accounts_data):
-        print(account)
-    
-    accounts_holder = tk.Frame(master, bg = BG_APP)
-    return accounts_holder
+from src.settings import *
+from src.profileframe.utils.logohandler import *
 
 
 def add_account(profile_frame: tk.Frame, connection) -> None:
@@ -35,31 +14,71 @@ def add_account(profile_frame: tk.Frame, connection) -> None:
     """
     popup = tk.Toplevel(bg = BG_APP)
 
-    plataform = tk.Entry(popup,
+    entrys_holder = tk.Frame(popup,
+                             bg = BG_APP)
+    entrys_holder.pack(anchor = "center",
+                       fill = "x")
+
+    def select_logo():
+        """Selects a logo for the plataform"""
+        nonlocal logo_image
+        logo_path = filedialog.askopenfilename(filetypes = [("Image files", "*.png;*.jpg;*.jpeg")])
+        if logo_path:
+            logo_image = treat_logo_file(logo_path)
+
+            logo.configure(image = logo_image)
+            logo.image = logo_image
+
+    logo_image = treat_logo(None)
+
+    logo = tk.Button(entrys_holder,
+                     image = logo_image,
+                     bg = BG_APP,
+                     relief = "flat",
+                     command = select_logo)
+    logo.image = logo_image
+    logo.grid(row = 0, rowspan = 3,
+              column = 0,
+              sticky = "nsew",
+              padx = 10,
+              pady = 5)
+    
+    logo_image = None
+
+    plataform = tk.Entry(entrys_holder,
                          font = PROFILE_WIDGETS_FONT,
                          fg = HINT_FG,
                          bg = BG_APP)
-    plataform.pack(anchor = "center")
+    plataform.grid(row = 0,
+                   column = 1,
+                   pady = 5,
+                   sticky = "nsw")
     plataform.insert(0, PROFILE_NEW_PLATAFORM_HINT)
     plataform.bind("<FocusIn>", lambda event: entry_focus_in(plataform, PROFILE_NEW_PLATAFORM_HINT))
     plataform.bind("<FocusOut>", lambda event: entry_focus_out(plataform, PROFILE_NEW_PLATAFORM_HINT))
     plataform.bind("<Return>", lambda event: login.focus())
 
-    login = tk.Entry(popup,
+    login = tk.Entry(entrys_holder,
                      font = PROFILE_WIDGETS_FONT,
                      fg = HINT_FG,
                      bg = BG_APP)
-    login.pack(anchor = "center")
+    login.grid(row = 1,
+               column = 1,
+               pady = 5,
+               sticky = "nsw")
     login.insert(0, PROFILE_NEW_LOGIN_HINT)
     login.bind("<FocusIn>", lambda event: entry_focus_in(login, PROFILE_NEW_LOGIN_HINT))
     login.bind("<FocusOut>", lambda event: entry_focus_out(login, PROFILE_NEW_LOGIN_HINT))
     login.bind("<Return>", lambda event: password.focus())
 
-    password = tk.Entry(popup,
+    password = tk.Entry(entrys_holder,
                         font = PROFILE_WIDGETS_FONT,
                         fg = HINT_FG,
                         bg = BG_APP)
-    password.pack(anchor = "center")
+    password.grid(row = 2,
+                  column = 1,
+                  pady = 5,
+                  sticky = "nsw")
     password.insert(0, PROFILE_NEW_PASSWORD_HINT)
     password.bind("<FocusIn>", lambda event: entry_focus_in(password, PROFILE_NEW_PASSWORD_HINT))
     password.bind("<FocusOut>", lambda event: entry_focus_out(password, PROFILE_NEW_PASSWORD_HINT))
@@ -70,7 +89,7 @@ def add_account(profile_frame: tk.Frame, connection) -> None:
     get_account_info = lambda: [plataform.get(),
                                 encrypt_data(login.get(), key),
                                 encrypt_data(password.get(), key),
-                                "LOGOOO",
+                                logo_to_bytes(logo_image),
                                 user_id]
 
     entrys_filled = lambda: False if plataform.get() in ("", PROFILE_NEW_PLATAFORM_HINT) \
@@ -83,6 +102,8 @@ def add_account(profile_frame: tk.Frame, connection) -> None:
                     font = PROFILE_WIDGETS_FONT,
                     fg = FG,
                     bg = BG_APP,
+                    width = 5,
                     command = lambda: (save_account(get_account_info(), connection), profile_frame.reload(), popup.destroy()) \
                                       if entrys_filled() else None)
-    add.pack(anchor = "center")
+    add.pack(anchor = "center",
+             pady = 5)
