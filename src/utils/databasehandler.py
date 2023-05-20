@@ -121,6 +121,23 @@ def update_logo(logo_bytes: bytes, account_id: int, connection: sqlite3.Connecti
     return
 
 
+def update_account(account: list, connection: sqlite3.Connection) -> None:
+    """Updates an account information
+    
+    Parameters:
+    account(list): List with updated info of the account
+    connection(sqlite3.Connection): Connection to the database
+    """
+    cursor = connection.cursor()
+
+    cursor.execute("UPDATE accounts SET plataform = ?, login = ?, password = ? WHERE id = ?", (account))
+    connection.commit()
+
+    cursor.close()
+
+    return
+
+
 def delete_account(account_id: int, connection: sqlite3.Connection):
     """Deletes the account from the database
     

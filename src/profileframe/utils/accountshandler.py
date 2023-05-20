@@ -4,6 +4,7 @@ from src.settings import *
 from src.utils import *
 from src.profileframe.utils.copyinfo import *
 from src.profileframe.utils.separator import *
+from src.profileframe.utils.editaccount import *
 from src.profileframe.utils.logohandler import *
 from src.profileframe.utils.visibilityhandler import *
 
@@ -32,8 +33,13 @@ def populate_accounts(master: tk.Frame, user_id: int, key: bytes, window: tk.Tk,
                          fill = "x")
 
     delete_image = treat_image_file("assets/Delete.png")
+
     edit_image = treat_image_file("assets/Edit.png")
+    save_image = treat_image_file("assets/Save.png")
+    save_edit_images = [save_image, edit_image]
+
     copy_image= treat_image_file("assets/Copy.png", (20, 20))
+
     visibility_image = [treat_image_file("assets/hide.png", (25, 20)), treat_image_file("assets/show.png", (25, 20))]
 
     for account in accounts:
@@ -136,13 +142,13 @@ def populate_accounts(master: tk.Frame, user_id: int, key: bytes, window: tk.Tk,
         show_hide_password.grid(row = 2,
                                 column = 2,
                                 sticky = "nse")
-        
-        
+
         edit_button = tk.Button(account_frame,
-                                image = edit_image,
+                                image = save_edit_images[1],
                                 bg = BG_APP,
-                                relief = "ridge")
-        edit_button.image = edit_image
+                                relief = "ridge",
+                                command = lambda: edit_account(edit_button, save_edit_images, account[0], key, connection, [plataform, login, password]))
+        edit_button.image = save_edit_images[1]
         edit_button.grid(row = 0, rowspan = 3,
                          column = 3,
                          sticky = "nsew",
