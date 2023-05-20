@@ -24,7 +24,7 @@ def add_account(profile_frame: tk.Frame, connection) -> None:
         nonlocal logo_image
         logo_path = filedialog.askopenfilename(filetypes = [("Image files", "*.png;*.jpg;*.jpeg")])
         if logo_path:
-            logo_image = treat_logo_file(logo_path)
+            logo_image = treat_image_file(logo_path)
 
             logo.configure(image = logo_image)
             logo.image = logo_image

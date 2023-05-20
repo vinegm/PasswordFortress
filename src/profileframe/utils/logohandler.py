@@ -3,6 +3,22 @@ from PIL import Image, ImageTk
 from io import BytesIO
 
 
+def treat_image_file(logo_path: str, size: tuple = (75, 75)) -> tk.PhotoImage:
+    """Takes a file path and converts it to a tkinter photo image
+    
+    Parameter:
+    logo_path(str): Path to the logo
+
+    Retruns:
+    logo(tk.PhotoImage): The treated logo
+    """
+    logo = Image.open(logo_path)
+    logo = logo.resize(size)
+
+    logo = ImageTk.PhotoImage(logo)
+    return logo
+
+
 def treat_logo(logo: bytes) -> tk.PhotoImage:
     """Treats the logo blob for it to be used in tkinter
     
@@ -14,10 +30,7 @@ def treat_logo(logo: bytes) -> tk.PhotoImage:
     """
     # Checks if is has a logo, if it doesn't assings it a placeholder
     if logo == None:
-        place_holder = Image.open("assets/Question_Mark.png")
-        place_holder = place_holder.resize((75, 75))
-
-        logo = ImageTk.PhotoImage(place_holder)
+        logo = treat_image_file("assets/Question_Mark.png")
 
         return logo
     
@@ -26,22 +39,6 @@ def treat_logo(logo: bytes) -> tk.PhotoImage:
 
     logo = ImageTk.PhotoImage(logo)
 
-    return logo
-
-
-def treat_logo_file(logo_path: str) -> tk.PhotoImage:
-    """Takes a file path and converts it to a tkinter photo image
-    
-    Parameter:
-    logo_path(str): Path to the logo
-
-    Retruns:
-    logo(tk.PhotoImage): The treated logo
-    """
-    logo = Image.open(logo_path)
-    logo = logo.resize((75, 75))
-
-    logo = ImageTk.PhotoImage(logo)
     return logo
 
 

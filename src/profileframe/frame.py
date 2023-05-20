@@ -49,12 +49,15 @@ class ProfileFrame(tk.Frame):
                     column = 0,
                     sticky = "w")
 
-        create_separator(widgets_holder)
+        separator = create_separator(widgets_holder)
+        separator.pack(anchor = "center",
+                       fill = "x")
 
         accounts = tk.Frame(widgets_holder,
                             bg = BG_APP)
         accounts.pack(anchor = "center",
-                      fill = "x")
+                      fill = "both",
+                      expand = True)
         
         self.accounts_loader = lambda: populate_accounts(accounts, self.user[0], self.user[2], connection)
         self.accounts_holder = self.accounts_loader()
@@ -65,7 +68,8 @@ class ProfileFrame(tk.Frame):
                                 fg = FG,
                                 bg = BG_APP,
                                 command = lambda: add_account(self, connection))
-        add.pack(anchor = "center")
+        add.pack(anchor = "center",
+                 pady = 10)
 
     def reload(self, changing_user: bool = False) -> None:
         """Reloads the header and accounts of the Profile frame

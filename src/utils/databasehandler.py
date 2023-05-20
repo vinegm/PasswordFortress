@@ -103,6 +103,41 @@ def save_account(account: list, connection: sqlite3.Connection):
     return
 
 
+def update_logo(logo_bytes: bytes, account_id: int, connection: sqlite3.Connection):
+    """Updates the logo of a account in the database
+    
+    Parameters:
+    logo_bytes(bytes): The bytes blob of the image
+    account_id(int): The id of the account in the database
+    connection(sqlite3.Connection): Connection to the database
+    """
+    cursor = connection.cursor()
+
+    cursor.execute("UPDATE accounts SET logo = ? WHERE id = ?", (logo_bytes, account_id))
+    connection.commit
+
+    cursor.close()
+
+    return
+
+
+def delete_account(account_id: int, connection: sqlite3.Connection):
+    """Deletes the account from the database
+    
+    Parameters:
+    account_id(int): The id of the account in the database
+    connection(sqlite3.Connection): Connection to the database
+    """
+    cursor = connection.cursor()
+
+    cursor.execute("DELETE FROM accounts WHERE id = ?", (account_id,))
+    connection.commit()
+
+    cursor.close()
+
+    return
+
+
 def get_accounts(user_id: int, connection: sqlite3.Connection) -> tuple:
     """Gets all the accounts of a given user
 
