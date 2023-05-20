@@ -2,17 +2,20 @@ import tkinter as tk
 from tkinter import filedialog
 from src.settings import *
 from src.utils import *
+from src.profileframe.utils.copyinfo import *
 from src.profileframe.utils.separator import *
 from src.profileframe.utils.logohandler import *
+from src.profileframe.utils.visibilityhandler import *
 
 
-def populate_accounts(master: tk.Frame, user_id: int, key: bytes, connection) -> tk.Frame:
+def populate_accounts(master: tk.Frame, user_id: int, key: bytes, window: tk.Tk, connection) -> tk.Frame:
     """Populates the profile frame with the users accounts
 
     Parameters:
     master(tk.Frame): Frame that will hold the widgets
     user_id(int): Id of the current user
     key(bytes): Cryptography key of the user
+    window(tk.Tk): The window of the app
     connection(sqlite3.Connection): Connection to the database
 
     Returns:
@@ -30,6 +33,8 @@ def populate_accounts(master: tk.Frame, user_id: int, key: bytes, connection) ->
 
     delete_image = treat_image_file("assets/Delete.png")
     edit_image = treat_image_file("assets/Edit.png")
+    copy_image= treat_image_file("assets/Copy.png", (20, 20))
+    visibility_image = [treat_image_file("assets/hide.png", (25, 20)), treat_image_file("assets/show.png", (25, 20))]
 
     for account in accounts:
         account = list(account)
@@ -41,7 +46,7 @@ def populate_accounts(master: tk.Frame, user_id: int, key: bytes, connection) ->
         account_frame.pack(anchor = "center",
                            fill = "x",
                            expand = True)
-        account_frame.columnconfigure(1, weight = 1)
+        account_frame.columnconfigure(2, weight = 1)
 
         def change_logo():
             """change the logo for the plataform"""
@@ -60,7 +65,7 @@ def populate_accounts(master: tk.Frame, user_id: int, key: bytes, connection) ->
         logo = tk.Button(account_frame,
                          image = logo_image,
                          bg = BG_APP,
-                         relief = "flat",
+                         relief = "solid",
                          command = change_logo)
         logo.image = logo_image
         logo.grid(row = 0, rowspan = 3,
@@ -80,7 +85,7 @@ def populate_accounts(master: tk.Frame, user_id: int, key: bytes, connection) ->
         plataform.insert(0, account[1])
         plataform.configure(state = "disabled")
         plataform.grid(row = 0,
-                       column = 1,
+                       column = 1, columnspan = 2,
                        sticky = "nsew")
 
         login = tk.Entry(account_frame,
@@ -94,11 +99,17 @@ def populate_accounts(master: tk.Frame, user_id: int, key: bytes, connection) ->
         login.insert(0, account[2])
         login.configure(state = "disabled")
         login.grid(row = 1,
-                   column = 1,
+                   column = 2,
                    sticky = "nsew")
-        
+
+        copy_login = create_copy_button(login, copy_image, account_frame, window)
+        copy_login.grid(row = 1,
+                        column = 1,
+                        sticky = "nsw")
+
         password = tk.Entry(account_frame,
                             font = PROFILE_WIDGETS_FONT,
+                            show = "*",
                             justify = "left",
                             fg = FG,
                             disabledforeground = FG,
@@ -108,16 +119,32 @@ def populate_accounts(master: tk.Frame, user_id: int, key: bytes, connection) ->
         password.insert(0, account[3])
         password.configure(state = "disabled")
         password.grid(row = 2,
-                      column = 1,
+                      column = 2,
                       sticky = "nsew")
 
+        copy_password = create_copy_button(password, copy_image, account_frame, window)
+        copy_password.grid(row = 2,
+                           column = 1,
+                           sticky = "nsw")
+        
+        show_hide_password = tk.Button(account_frame,
+                                       image = visibility_image[1],
+                                       bg = BG_APP,
+                                       relief = "flat")
+        show_hide_password.configure(command = lambda entry = password, button = show_hide_password: \
+                                     visibility_toggler(entry, button, visibility_image))
+        show_hide_password.grid(row = 2,
+                                column = 2,
+                                sticky = "nse")
+        
+        
         edit_button = tk.Button(account_frame,
                                 image = edit_image,
                                 bg = BG_APP,
-                                relief = "flat")
+                                relief = "ridge")
         edit_button.image = edit_image
         edit_button.grid(row = 0, rowspan = 3,
-                         column = 2,
+                         column = 3,
                          sticky = "nsew",
                          padx = 10,
                          pady = 5)
@@ -128,17 +155,17 @@ def populate_accounts(master: tk.Frame, user_id: int, key: bytes, connection) ->
         delete_button = tk.Button(account_frame,
                                   image = delete_image,
                                   bg = BG_APP,
-                                  relief = "flat",
+                                  relief = "ridge",
                                   command = delete_acc)
         delete_button.image = delete_image
         delete_button.grid(row = 0, rowspan = 3,
-                           column = 3,
+                           column = 4,
                            sticky = "nsew",
                            padx = 10,
                            pady = 5)
 
         separator = create_separator(account_frame)
-        separator.grid(column = 0, columnspan = 4,
+        separator.grid(column = 0, columnspan = 5,
                        sticky = "ew")
 
     return accounts_holder

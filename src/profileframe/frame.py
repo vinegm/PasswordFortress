@@ -59,7 +59,7 @@ class ProfileFrame(tk.Frame):
                       fill = "both",
                       expand = True)
         
-        self.accounts_loader = lambda: populate_accounts(accounts, self.user[0], self.user[2], connection)
+        self.accounts_loader = lambda: populate_accounts(accounts, self.user[0], self.user[2], window, connection)
         self.accounts_holder = self.accounts_loader()
 
         add = tk.Button(widgets_holder,

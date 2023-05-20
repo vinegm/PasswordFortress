@@ -34,7 +34,7 @@ def add_account(profile_frame: tk.Frame, connection) -> None:
     logo = tk.Button(entrys_holder,
                      image = logo_image,
                      bg = BG_APP,
-                     relief = "flat",
+                     relief = "solid",
                      command = select_logo)
     logo.image = logo_image
     logo.grid(row = 0, rowspan = 3,
