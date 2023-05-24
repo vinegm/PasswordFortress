@@ -1,6 +1,7 @@
 import tkinter as tk
 from src.utils import *
 from src.settings import *
+from src.loginframe.timeout import *
 
 
 def login_User(username_entry: tk.Entry, password_entry: tk.Entry, widgets: dict, guide: tk.Label, login: tk.Button, connection, window: tk.Tk):
@@ -22,16 +23,30 @@ def login_User(username_entry: tk.Entry, password_entry: tk.Entry, widgets: dict
         guide.configure(text = INVALID_LOGIN,
                         fg = INVALID_LOGIN_FG)
         return
-    
+
+    timeout_duration = check_timeout(user_info[0], user_info[5], user_info[7], connection)
+    if timeout_duration != None:
+        guide.configure(text = f"{TIMEOUT_LOGIN} {timeout_duration}",
+                        fg = TIMEOUT_LOGIN_FG)
+        return
+
     hashed_password = hash_check(password, user_info[3])
     if hashed_password != user_info[4]:
-        guide.configure(text = INVALID_LOGIN,
-                        fg = INVALID_LOGIN_FG)
-        window.focus_get()
+        tries_left = failed_login(user_info[0], user_info[5], user_info[6], connection)
+
+        if tries_left > 0:
+            guide.configure(text = f"{START_TIMEOUT_WARNING} {tries_left} {END_TIMEOUT_WARNING}",
+                            fg = TIMEOUT_WARNING_FG)
+            return
+        
+        guide.configure(text = SUSPENDED_LOGIN,
+                        fg = SUSPENDED_LOGIN_FG)
         return
 
     guide.configure(text = VALID_LOGIN,
                     fg = VALID_LOGIN_FG)
+
+    clear_tries(user_info[0], connection)
 
     key = KDF(password, user_info[3])
     

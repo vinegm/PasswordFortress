@@ -5,19 +5,29 @@ from src.settings import *
 from src.profileframe.utils.logohandler import *
 
 
-def add_account(profile_frame: tk.Frame, connection) -> None:
+def add_account(profile_frame: tk.Frame, window: tk.Tk, connection) -> None:
     """Creates a popup for the user to add a new account
     
     Parameters:
     profile_frame(tk.Frame): Master frame, used for calling functions
+    window(tk.Tk): Window of the app
     connection(sqlite3.Connection): Connection to the database
     """
     popup = tk.Toplevel(bg = BG_APP)
 
-    entrys_holder = tk.Frame(popup,
+    popup.title("Add Account")
+    popup.iconbitmap("assets/Key.ico")
+    popup.resizable(False, False)
+
+    widgets_holder = tk.Frame(popup,
+                              bg = BG_APP)
+    widgets_holder.pack(anchor = "center",
+                        fill = "both",
+                        expand = False)
+
+    entrys_holder = tk.Frame(widgets_holder,
                              bg = BG_APP)
-    entrys_holder.pack(anchor = "center",
-                       fill = "x")
+    entrys_holder.pack(anchor = "center")
 
     def select_logo():
         """Selects a logo for the plataform"""
@@ -97,13 +107,33 @@ def add_account(profile_frame: tk.Frame, connection) -> None:
                             or password.get() in ("", PROFILE_NEW_PASSWORD_HINT) \
                             else True
 
-    add = tk.Button(popup,
-                    text = "add",
-                    font = PROFILE_WIDGETS_FONT,
-                    fg = FG,
+    add_image = treat_image_file("assets/Plus_Icon.png", (30, 30))
+
+    add = tk.Button(widgets_holder,
+                    image = add_image,
                     bg = BG_APP,
-                    width = 5,
                     command = lambda: (save_account(get_account_info(), connection), profile_frame.reload(), popup.destroy()) \
                                       if entrys_filled() else None)
+    add.image = add_image
     add.pack(anchor = "center",
              pady = 5)
+
+    popup_position(popup, window)
+
+
+def popup_position(popup: tk.Toplevel, window: tk.Tk):
+    """Calculates the position of the main window to place the popup int the middle of it"""
+    main_x = window.winfo_x()
+    main_y = window.winfo_y()
+    main_width = window.winfo_width()
+    main_height = window.winfo_height()
+
+    popup.update_idletasks()
+
+    toplevel_width = popup.winfo_width()
+    toplevel_height = popup.winfo_height()
+
+    toplevel_x = main_x + (main_width - toplevel_width) // 2
+    toplevel_y = main_y + (main_height - toplevel_height) // 2
+
+    popup.geometry(f"+{toplevel_x}+{toplevel_y}")

@@ -25,6 +25,18 @@ LOGIN_LOG_IN_TEXT = "Log In"
 INVALID_LOGIN = "This Login is Invalid."
 INVALID_LOGIN_FG = "Red"
 
+TIMEOUT_LOGIN = "Account Suspended For:"
+TIMEOUT_LOGIN_FG = "Red"
+
+START_TIMEOUT_WARNING = "Account Will be Suspended in"
+END_TIMEOUT_WARNING = "Tries..."
+TIMEOUT_WARNING_FG = "Yellow"
+
+SUSPENDED_LOGIN = "Account Suspended"
+SUSPENDED_LOGIN_FG = "Red"
+
+TRIES_TO_TIMEOUT = 5
+
 # Text and text color for a invalid login
 VALID_LOGIN = "Login in..."
 VALID_LOGIN_FG = "Green"

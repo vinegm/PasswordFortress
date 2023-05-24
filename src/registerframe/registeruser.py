@@ -40,4 +40,4 @@ def register_user(nickname_entry: tk.Entry, username_entry: tk.Entry, password_e
                     fg = REGISTER_SUCCESS_FG)
 
     hashed_password, salt = hash_info(password)
-    register_new_user(nickname, username, salt, hashed_password, connection)
+    register_new_user(nickname, username, salt, hashed_password, 0, connection)

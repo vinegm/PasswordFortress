@@ -26,7 +26,10 @@ def set_database(connection: sqlite3.Connection) -> None:
                       nickname VARCHAR NOT NULL,
                       username VARCHAR UNIQUE NOT NULL,
                       salt NOT NULL,
-                      hashed_password VARCHAR NOT NULL)""")
+                      hashed_password VARCHAR NOT NULL,
+                      login_tries INTEGER NOT NULL,
+                      last_try DATE,
+                      timeout_until DATE)""")
     
     cursor.execute("""CREATE TABLE IF NOT EXISTS accounts (
                       id INTEGER PRIMARY KEY AUTOINCREMENT, 
@@ -43,7 +46,7 @@ def set_database(connection: sqlite3.Connection) -> None:
     return
 
 
-def register_new_user(nickname: str, username: str, salt: bytes, password: str, connection: sqlite3.Connection):
+def register_new_user(nickname: str, username: str, salt: bytes, password: str, login_tries: int, connection: sqlite3.Connection):
     """Registers a new user to the database
     
     Parameters:
@@ -55,7 +58,7 @@ def register_new_user(nickname: str, username: str, salt: bytes, password: str, 
     """
     cursor = connection.cursor()
 
-    cursor.execute("INSERT INTO users (nickname, username, salt, hashed_password) VALUES (?, ?, ?, ?)", (nickname, username, salt, password))
+    cursor.execute("INSERT INTO users (nickname, username, salt, hashed_password, login_tries) VALUES (?, ?, ?, ?, ?)", (nickname, username, salt, password, login_tries))
     connection.commit()
 
     cursor.close()
@@ -114,7 +117,7 @@ def update_logo(logo_bytes: bytes, account_id: int, connection: sqlite3.Connecti
     cursor = connection.cursor()
 
     cursor.execute("UPDATE accounts SET logo = ? WHERE id = ?", (logo_bytes, account_id))
-    connection.commit
+    connection.commit()
 
     cursor.close()
 
@@ -173,3 +176,36 @@ def get_accounts(user_id: int, connection: sqlite3.Connection) -> tuple:
     cursor.close()
 
     return accounts
+
+
+def update_login_tries(user_id: int, login_tries: int, last_try, connection: sqlite3.Connection) -> None:
+    cursor = connection.cursor()
+
+    cursor.execute("UPDATE users SET login_tries = ?, last_try = ? WHERE id = ?", (login_tries, last_try, user_id))
+    connection.commit()
+
+    cursor.close()
+    
+    return
+
+
+def timeout_user(user_id: int, timeout, connection: sqlite3.Connection) -> None:
+    cursor = connection.cursor()
+
+    cursor.execute("UPDATE users SET login_tries = ?, timeout_until = ? WHERE id = ?", (0, timeout, user_id))
+    connection.commit()
+
+    cursor.close()
+    
+    return
+
+
+def remove_timeout(user_id: int, connection: sqlite3.Connection) -> None:
+    cursor = connection.cursor()
+
+    cursor.execute("UPDATE users SET timeout_until = ? WHERE id = ?", (None, user_id))
+    connection.commit()
+
+    cursor.close()
+    
+    return

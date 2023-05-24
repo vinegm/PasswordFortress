@@ -13,7 +13,7 @@ def KDF(password: str, salt: bytes) -> bytes:
     derived_key(bytes): The derived key from the password and salt
     """
     DESIRED_KEY_LENGTH = 32
-    ITERATIONS = 2_500  # Make it 10_000 if you don't care about long logins
+    ITERATIONS = 100  # 2_500  # Make it 10_000 if you don't care about long logins
 
     uncoded_derived_key = bcrypt.kdf(password = password.encode(),
                                      salt = salt,

@@ -38,36 +38,38 @@ class ProfileFrame(tk.Frame):
                     sticky = "nsew")
         self.header_changer = lambda: header.configure(text = self.user[1])
         
+        logoff_image = treat_image_file("assets/Logoff.png", (40, 40))
+
         logoff = tk.Button(header_holder,
-                           text = "logoff",
-                           font = PROFILE_WIDGETS_FONT,
-                           fg = FG,
+                           image = logoff_image,
                            bg = BG_APP,
                            command = lambda: window.change_frame("LoginFrame"))
+        logoff.image = logoff_image
         logoff.configure(relief = tk.FLAT)
         logoff.grid(row = 0,
                     column = 0,
                     sticky = "w")
 
-        separator = create_separator(widgets_holder)
-        separator.pack(anchor = "center",
-                       fill = "x")
+        header_separator = create_separator(widgets_holder)
+        header_separator.pack(anchor = "center",
+                              fill = "x")
 
-        accounts = tk.Frame(widgets_holder,
-                            bg = BG_APP)
-        accounts.pack(anchor = "center",
-                      fill = "both",
-                      expand = True)
+        accounts = create_scrollbar_zone(widgets_holder, window)
         
         self.accounts_loader = lambda: populate_accounts(accounts, self.user[0], self.user[2], window, connection)
         self.accounts_holder = self.accounts_loader()
 
+        footer_separator = create_separator(widgets_holder)
+        footer_separator.pack(anchor = "center",
+                              fill = "x")
+
+        add_image = treat_image_file("assets/Plus_Icon.png", (50, 50))
+
         add = tk.Button(widgets_holder,
-                                text = "ADD",
-                                font = PROFILE_WIDGETS_FONT,
-                                fg = FG,
-                                bg = BG_APP,
-                                command = lambda: add_account(self, connection))
+                        image = add_image,
+                        bg = BG_APP,
+                        command = lambda: add_account(self, window, connection))
+        add.image = add_image
         add.pack(anchor = "center",
                  pady = 10)
 

@@ -28,6 +28,6 @@ def decrypt_data(data: bytes, key: bytes) -> str:
     encrypted_data(str): The dencrypted data
     """
     cipher = Fernet(key)
-    decrypted_data= cipher.decrypt(data)
+    decrypted_data = (cipher.decrypt(data)).decode()
 
     return decrypted_data
