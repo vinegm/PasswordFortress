@@ -60,6 +60,12 @@ REGISTER_CONFIRM_PASSWORD_HINT = "Confirm the Password"
 REGISTER_WIDGETS_FONT = (STD_FONT, STD_SIZE_FONT)
 REGISTER_SING_UP_TEXT = "Sing Up"
 
+
+# Setting of the password strength display
+REGISTER_STRENGTH_TEXT = "Strength:"
+REGISTER_STRENGTH_FONT = (STD_FONT, STD_SIZE_FONT-4)
+
+
 # Settings of the back button
 REGISTER_BACK_TEXT = "Back"
 REGISTER_BACK_FONT = (STD_FONT, STD_SIZE_FONT-2, "underline")

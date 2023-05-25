@@ -94,6 +94,12 @@ def add_account(profile_frame: tk.Frame, window: tk.Tk, connection) -> None:
     password.bind("<FocusOut>", lambda event: entry_focus_out(password, PROFILE_NEW_PASSWORD_HINT))
     password.bind("<Return>", lambda event: (save_account(get_account_info(), connection), profile_frame.reload(), popup.destroy()) \
                                             if entrys_filled() else None)
+    
+    bar_frame = create_strength_bar(password, entrys_holder)
+    bar_frame.grid(row = 3,
+                   column = 1,
+                   sticky = "nsew")
+
     user_id = profile_frame.user[0]
     key = profile_frame.user[2]
     get_account_info = lambda: [plataform.get(),

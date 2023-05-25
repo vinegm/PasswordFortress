@@ -35,7 +35,11 @@ class RegisterFrame(tk.Frame):
         guide.pack(anchor = "center",
                    pady = 10)
 
-        nickname = tk.Entry(widgets_holder,
+        entrys_holder = tk.Frame(widgets_holder,
+                                 bg = BG_APP)
+        entrys_holder.pack(expand = True)
+
+        nickname = tk.Entry(entrys_holder,
                             font = REGISTER_WIDGETS_FONT,
                             fg = HINT_FG,
                             bg = BG_APP)
@@ -46,7 +50,7 @@ class RegisterFrame(tk.Frame):
         nickname.bind("<FocusOut>", lambda event: entry_focus_out(nickname, REGISTER_NICKNAME_HINT))
         nickname.bind("<Return>", lambda event: username.focus())
 
-        username = tk.Entry(widgets_holder,
+        username = tk.Entry(entrys_holder,
                             font = REGISTER_WIDGETS_FONT,
                             fg = HINT_FG,
                             bg = BG_APP)
@@ -57,7 +61,7 @@ class RegisterFrame(tk.Frame):
         username.bind("<FocusOut>", lambda event: entry_focus_out(username, REGISTER_USERNAME_HINT))
         username.bind("<Return>", lambda event: password.focus())
 
-        password = tk.Entry(widgets_holder,
+        password = tk.Entry(entrys_holder,
                             font = REGISTER_WIDGETS_FONT,
                             fg = HINT_FG,
                             bg = BG_APP)
@@ -68,12 +72,16 @@ class RegisterFrame(tk.Frame):
         password.bind("<FocusOut>", lambda event: entry_focus_out(password, REGISTER_PASSWORD_HINT))
         password.bind("<Return>", lambda event: confirm_password.focus())
 
-        confirm_password = tk.Entry(widgets_holder,
-                            font = REGISTER_WIDGETS_FONT,
-                            fg = HINT_FG,
-                            bg = BG_APP)
+        bar_frame = create_strength_bar(password, entrys_holder)
+        bar_frame.pack(anchor = "nw",
+                       fill = "x")
+
+        confirm_password = tk.Entry(entrys_holder,
+                                    font = REGISTER_WIDGETS_FONT,
+                                    fg = HINT_FG,
+                                    bg = BG_APP)
         confirm_password.pack(anchor = "center",
-                      pady = 5)
+                              pady = 5)
         confirm_password.insert(0, REGISTER_CONFIRM_PASSWORD_HINT)
         confirm_password.bind("<FocusIn>", lambda event: entry_focus_in(confirm_password, REGISTER_CONFIRM_PASSWORD_HINT))
         confirm_password.bind("<FocusOut>", lambda event: entry_focus_out(confirm_password, REGISTER_CONFIRM_PASSWORD_HINT))

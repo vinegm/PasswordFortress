@@ -24,7 +24,7 @@ def login_User(username_entry: tk.Entry, password_entry: tk.Entry, widgets: dict
                         fg = INVALID_LOGIN_FG)
         return
 
-    timeout_duration = check_timeout(user_info[0], user_info[5], user_info[7], connection)
+    timeout_duration = check_timeout(user_info[0], user_info[7], connection)
     if timeout_duration != None:
         guide.configure(text = f"{TIMEOUT_LOGIN} {timeout_duration}",
                         fg = TIMEOUT_LOGIN_FG)
