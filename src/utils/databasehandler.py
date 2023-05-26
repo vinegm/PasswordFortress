@@ -66,6 +66,19 @@ def register_new_user(nickname: str, username: str, salt: bytes, password: str, 
     return
 
 
+def delete_user(user_id: int, connection: sqlite3.Connection) -> None:
+    """Deletes a user and all accounts linked to him"""
+    cursor = connection.cursor()
+
+    cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
+    cursor.execute("DELETE FROM accounts WHERE user_id = ?", (user_id,))
+    connection.commit()
+
+    cursor.close()
+    
+    return
+
+
 def user_exists(search: str, connection: sqlite3.Connection) -> tuple or False:
     """Checks if a user exists on the database based on its username
     

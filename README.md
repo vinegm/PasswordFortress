@@ -4,5 +4,5 @@
 
 <h2>To Do List:</h2>
 
-<li>Add the options to delete the user and change password </li>
+<li>Add the option change the user password </li>
 <li>Turn the project in a .exe</li>

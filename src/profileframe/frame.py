@@ -14,7 +14,8 @@ class ProfileFrame(tk.Frame):
     def __init__(self, connection: sqlite3.Connection, master: tk.Frame, window: tk.Tk):
         tk.Frame.__init__(self, master, bg = BG_APP)
 
-        self.user = [None, "Placeholder", None]
+        # Placeholder
+        self.user = [None, "UserNickname", None, "UserPassword", None]
 
         widgets_holder = tk.Frame(self,
                                   bg = BG_APP)
@@ -34,7 +35,7 @@ class ProfileFrame(tk.Frame):
                           fg = FG,
                           bg = BG_APP)
         header.grid(row = 0,
-                    column = 0, columnspan = 3,
+                    column = 0, columnspan = 4,
                     sticky = "nsew")
         self.header_update = lambda: header.configure(text = self.user[1])
         
@@ -50,13 +51,37 @@ class ProfileFrame(tk.Frame):
                     column = 0,
                     sticky = "w")
 
+        change_image = treat_image_file("assets/Change_Password.png", (40, 40))
+
+        change_password = tk.Button(header_holder,
+                                    image = change_image,
+                                    bg = BG_APP,
+                                    command = lambda: print("WIP"))
+        change_password.image = change_image
+        change_password.configure(relief = tk.FLAT)
+        change_password.grid(row = 0,
+                             column = 2,
+                             sticky = "w")
+
+        delete_image = treat_image_file("assets/Delete.png", (40, 40))
+
+        delete_user = tk.Button(header_holder,
+                                image = delete_image,
+                                bg = BG_APP,
+                                command = lambda: delete_current_user(self, self.user[0], self.user[2], self.user[3], window, connection))
+        delete_user.image = delete_image
+        delete_user.configure(relief = tk.FLAT)
+        delete_user.grid(row = 0,
+                         column = 3,
+                         sticky = "w")
+
         header_separator = create_separator(widgets_holder)
         header_separator.pack(anchor = "center",
                               fill = "x")
 
         accounts = create_scrollbar_zone(widgets_holder, window)
         
-        self.accounts_loader = lambda: populate_accounts(accounts, self.user[0], self.user[2], window, connection)
+        self.accounts_loader = lambda: populate_accounts(accounts, self.user[0], self.user[4], window, connection)
         self.accounts_holder = self.accounts_loader()
 
         footer_separator = create_separator(widgets_holder)

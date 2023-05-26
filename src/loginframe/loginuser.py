@@ -51,7 +51,7 @@ def login_User(username_entry: tk.Entry, password_entry: tk.Entry, widgets: dict
     key = KDF(password, user_info[3])
     
     # Passes the user info into the profile frame
-    window.frames["ProfileFrame"].user = [user_info[0], user_info[1], key]
+    window.frames["ProfileFrame"].user = [user_info[0], user_info[1], user_info[3], user_info[4], key]
     window.frames["ProfileFrame"].reload(True)
 
     login.focus()
