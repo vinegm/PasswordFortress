@@ -145,7 +145,7 @@ def populate_accounts(master: tk.Frame, user_id: int, key: bytes, window: tk.Tk,
 
         edit_button = tk.Button(account_frame,
                                 image = save_edit_images[1],
-                                bg = BG_APP,
+                                bg = BUTTONS_BG,
                                 relief = "ridge",
                                 command = lambda: edit_account(edit_button, save_edit_images, account[0], key, connection, [plataform, login, password]))
         edit_button.image = save_edit_images[1]
@@ -160,7 +160,7 @@ def populate_accounts(master: tk.Frame, user_id: int, key: bytes, window: tk.Tk,
 
         delete_button = tk.Button(account_frame,
                                   image = delete_image,
-                                  bg = BG_APP,
+                                  bg = BUTTONS_BG,
                                   relief = "ridge",
                                   command = delete_acc)
         delete_button.image = delete_image

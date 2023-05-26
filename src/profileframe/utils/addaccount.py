@@ -16,7 +16,7 @@ def add_account(profile_frame: tk.Frame, window: tk.Tk, connection) -> None:
     popup = tk.Toplevel(bg = BG_APP)
 
     popup.title("Add Account")
-    popup.iconbitmap("assets/Key.ico")
+    popup.iconbitmap("assets/Fort.ico")
     popup.resizable(False, False)
 
     widgets_holder = tk.Frame(popup,
@@ -82,6 +82,7 @@ def add_account(profile_frame: tk.Frame, window: tk.Tk, connection) -> None:
     login.bind("<Return>", lambda event: password.focus())
 
     password = tk.Entry(entrys_holder,
+                        width = 20,
                         font = PROFILE_WIDGETS_FONT,
                         fg = HINT_FG,
                         bg = BG_APP)
@@ -94,11 +95,26 @@ def add_account(profile_frame: tk.Frame, window: tk.Tk, connection) -> None:
     password.bind("<FocusOut>", lambda event: entry_focus_out(password, PROFILE_NEW_PASSWORD_HINT))
     password.bind("<Return>", lambda event: (save_account(get_account_info(), connection), profile_frame.reload(), popup.destroy()) \
                                             if entrys_filled() else None)
-    
-    bar_frame = create_strength_bar(password, entrys_holder)
+
+    bar_frame, bar = create_strength_bar(password, entrys_holder, True)
     bar_frame.grid(row = 3,
                    column = 1,
                    sticky = "nsew")
+
+    def update_bar(bar):
+        bar["value"] = 100
+
+    generate_image = treat_image_file("assets/GenPassword.png", (20, 20))
+
+    generate = tk.Button(entrys_holder,
+                         image = generate_image,
+                         bg = BG_APP,
+                         relief = "flat",
+                         command = lambda entry = password, bar = bar: (generate_password(entry), update_bar(bar)))
+    generate.image = generate_image
+    generate.grid(row = 2,
+                  column = 1,
+                  sticky = "nse")
 
     user_id = profile_frame.user[0]
     key = profile_frame.user[2]
@@ -117,7 +133,7 @@ def add_account(profile_frame: tk.Frame, window: tk.Tk, connection) -> None:
 
     add = tk.Button(widgets_holder,
                     image = add_image,
-                    bg = BG_APP,
+                    bg = BUTTONS_BG,
                     command = lambda: (save_account(get_account_info(), connection), profile_frame.reload(), popup.destroy()) \
                                       if entrys_filled() else None)
     add.image = add_image

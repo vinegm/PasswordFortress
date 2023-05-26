@@ -107,6 +107,6 @@ class RegisterFrame(tk.Frame):
                              text = REGISTER_SING_UP_TEXT,
                              font = REGISTER_WIDGETS_FONT,
                              fg = FG,
-                             bg = BG_APP,
+                             bg = BUTTONS_BG,
                              command = lambda: register_user(nickname, username, password, confirm_password, WIDGETS, guide, connection))
         register.pack(anchor = "center")

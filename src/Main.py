@@ -1,8 +1,3 @@
-"""
-Password manager
- The project focus on making a desktop app that stores the users accounts safely in a friendly and simple way
-"""
-
 import tkinter as tk
 from src.utils import *
 from src.loginframe import *
@@ -17,7 +12,8 @@ class PasswordFortress(tk.Tk):
 
         self.title("PasswordFortress")
         self.eval("tk::PlaceWindow . center")
-        self.iconbitmap("assets/Key.ico")
+        self.geometry("525x400")
+        self.iconbitmap("assets/Fort.ico")
 
         connection = connect_database()
         

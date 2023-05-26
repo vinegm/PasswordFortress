@@ -74,6 +74,6 @@ class LoginFrame(tk.Frame):
                           text = LOGIN_LOG_IN_TEXT,
                           font = LOGIN_WIDGETS_FONT,
                           fg = FG,
-                          bg = BG_APP,
+                          bg = BUTTONS_BG,
                           command = lambda: (login_User(username, password, WIDGETS, guide, login, connection, window)))
         login.pack(anchor = "center")

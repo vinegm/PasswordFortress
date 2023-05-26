@@ -4,5 +4,4 @@
 
 <h2>To Do List:</h2>
 
-<li>Add a "generate password" feature that generates and stores a secure password</li>
 <li>Turn the project in a .exe</li>

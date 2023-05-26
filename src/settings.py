@@ -1,13 +1,20 @@
 # Color of the background of the entire app
-BG_APP = "White"
+BG_APP = "#545454"  # "#121212"
 
 # Color and font of the text
-FG = "Black"
+FG = "#e9e9e9"
 STD_FONT = "Arial"
 STD_SIZE_FONT = 12
 
 # Color of the hints in entrys
-HINT_FG = "Gray"
+HINT_FG = "#c2c0c0"
+
+# Settings of the strength bar
+BAR_BG = "#c2c0c0"
+BAR_COLOR = "#2596be"
+
+# BG of non flat buttons
+BUTTONS_BG = "#154c79"
 
 # Login Frame settings
 # Header text and font
@@ -23,28 +30,29 @@ LOGIN_LOG_IN_TEXT = "Log In"
 
 # Text and text color for a invalid login
 INVALID_LOGIN = "This Login is Invalid."
-INVALID_LOGIN_FG = "Red"
+INVALID_LOGIN_FG = "#ff0000"
 
+# Text and text color for warning suspension and suspended accounts
 TIMEOUT_LOGIN = "Account Suspended For:"
-TIMEOUT_LOGIN_FG = "Red"
+TIMEOUT_LOGIN_FG = "#ff0000"
 
 START_TIMEOUT_WARNING = "Account Will be Suspended in"
 END_TIMEOUT_WARNING = "Tries..."
-TIMEOUT_WARNING_FG = "Yellow"
+TIMEOUT_WARNING_FG = "#fcf917"
 
 SUSPENDED_LOGIN = "Account Suspended"
-SUSPENDED_LOGIN_FG = "Red"
+SUSPENDED_LOGIN_FG = "#ff0000"
 
 TRIES_TO_TIMEOUT = 5
 
 # Text and text color for a invalid login
 VALID_LOGIN = "Login in..."
-VALID_LOGIN_FG = "Green"
+VALID_LOGIN_FG = "#28ab00"
 
 # Settings of the register button
 LOGIN_REGISTER_TEXT = "Register"
 LOGIN_REGISTER_FONT = (STD_FONT, STD_SIZE_FONT-2, "underline")
-LOGIN_REGISTER_FG = "Blue"
+LOGIN_REGISTER_FG = "#063970"
 
 # Register Frame settings
 # Header text and font
@@ -69,10 +77,10 @@ REGISTER_STRENGTH_FONT = (STD_FONT, STD_SIZE_FONT-4)
 # Settings of the back button
 REGISTER_BACK_TEXT = "Back"
 REGISTER_BACK_FONT = (STD_FONT, STD_SIZE_FONT-2, "underline")
-REGISTER_BACK_FG = "Blue"
+REGISTER_BACK_FG = "#063970"
 
-REGISTER_SUCCESS_FG = "Green"
-REGISTER_ERROR_FG = "Red"
+REGISTER_SUCCESS_FG = "#28ab00"
+REGISTER_ERROR_FG = "#ff0000"
 
 # Register Frame settings
 # Header font

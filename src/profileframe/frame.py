@@ -36,14 +36,14 @@ class ProfileFrame(tk.Frame):
         header.grid(row = 0,
                     column = 0, columnspan = 3,
                     sticky = "nsew")
-        self.header_changer = lambda: header.configure(text = self.user[1])
+        self.header_update = lambda: header.configure(text = self.user[1])
         
         logoff_image = treat_image_file("assets/Logoff.png", (40, 40))
 
         logoff = tk.Button(header_holder,
                            image = logoff_image,
                            bg = BG_APP,
-                           command = lambda: window.change_frame("LoginFrame"))
+                           command = lambda: self.logoff(window))
         logoff.image = logoff_image
         logoff.configure(relief = tk.FLAT)
         logoff.grid(row = 0,
@@ -67,7 +67,7 @@ class ProfileFrame(tk.Frame):
 
         add = tk.Button(widgets_holder,
                         image = add_image,
-                        bg = BG_APP,
+                        bg = BUTTONS_BG,
                         command = lambda: add_account(self, window, connection))
         add.image = add_image
         add.pack(anchor = "center",
@@ -80,10 +80,21 @@ class ProfileFrame(tk.Frame):
         changing_user(bool): Only turned to true when changing the logged used
         """
         if changing_user:
-            self.header_changer()
+            self.header_update()
         
         if self.accounts_holder != None:
             self.accounts_holder.destroy()
 
         self.accounts_holder = self.accounts_loader()
+        return
+
+    def logoff(self, window):
+        """Clears the user info and the frame with the loaded accounts"""
+        self.user = [None, "Placeholder", None]
+
+        self.accounts_holder.destroy()
+        self.accounts_holder = None
+
+        window.change_frame("LoginFrame")
+
         return
