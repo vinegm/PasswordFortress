@@ -146,8 +146,10 @@ def populate_accounts(master: tk.Frame, user_id: int, key: bytes, window: tk.Tk,
         edit_button = tk.Button(account_frame,
                                 image = save_edit_images[1],
                                 bg = BUTTONS_BG,
-                                relief = "ridge",
-                                command = lambda: edit_account(edit_button, save_edit_images, account[0], key, connection, [plataform, login, password]))
+                                relief = "ridge")
+        edit_button.configure(command = lambda b = edit_button, acc_id = account[0], pl = plataform, lo = login, pa = password:
+                                        edit_account(b, save_edit_images, acc_id,
+                                                     key, connection, [pl, lo, pa]))
         edit_button.image = save_edit_images[1]
         edit_button.grid(row = 0, rowspan = 3,
                          column = 3,
