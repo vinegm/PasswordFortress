@@ -7,7 +7,7 @@ def connect_database():
     Return:
     connection(sqlite3.Connection): SQLite3 connection to a database
     """
-    connection = sqlite3.connect("src/UsersInfo.db")
+    connection = sqlite3.connect("assets/UsersInfo.db")
     set_database(connection)
 
     return connection
@@ -59,6 +59,18 @@ def register_new_user(nickname: str, username: str, salt: bytes, password: str, 
     cursor = connection.cursor()
 
     cursor.execute("INSERT INTO users (nickname, username, salt, hashed_password, login_tries) VALUES (?, ?, ?, ?, ?)", (nickname, username, salt, password, login_tries))
+    connection.commit()
+
+    cursor.close()
+
+    return
+
+
+def update_password(user_id: int, salt: bytes, password: bytes, connection: sqlite3.Connection):
+    """Updates the salt and hashed password of a user"""
+    cursor = connection.cursor()
+
+    cursor.execute("UPDATE users SET salt = ?, hashed_password = ? WHERE id = ?", (salt, password, user_id))
     connection.commit()
 
     cursor.close()
@@ -154,6 +166,18 @@ def update_account(account: list, connection: sqlite3.Connection) -> None:
     return
 
 
+def update_account_info(account: list, connection: sqlite3.Connection) -> None:
+    """Updates the login and password of a account"""
+    cursor = connection.cursor()
+
+    cursor.execute("UPDATE accounts SET login = ?, password = ? WHERE id = ?", (account))
+    connection.commit()
+
+    cursor.close()
+
+    return
+
+
 def delete_account(account_id: int, connection: sqlite3.Connection):
     """Deletes the account from the database
     
@@ -184,6 +208,18 @@ def get_accounts(user_id: int, connection: sqlite3.Connection) -> tuple:
     cursor = connection.cursor()
 
     cursor.execute("SELECT * FROM accounts WHERE user_id = ?", (user_id,))
+    accounts = cursor.fetchall()
+    
+    cursor.close()
+
+    return accounts
+
+
+def get_accounts_info(user_id: int, connection: sqlite3.Connection) -> tuple:
+    """Gets only the id, login and password of a account"""
+    cursor = connection.cursor()
+
+    cursor.execute("SELECT id, login, password FROM accounts WHERE user_id = ?", (user_id,))
     accounts = cursor.fetchall()
     
     cursor.close()

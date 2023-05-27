@@ -53,13 +53,13 @@ class ProfileFrame(tk.Frame):
 
         change_image = treat_image_file("assets/Change_Password.png", (40, 40))
 
-        change_password = tk.Button(header_holder,
+        change_password_button = tk.Button(header_holder,
                                     image = change_image,
                                     bg = BG_APP,
-                                    command = lambda: print("WIP"))
-        change_password.image = change_image
-        change_password.configure(relief = tk.FLAT)
-        change_password.grid(row = 0,
+                                    command = lambda: change_password(self, self.user, window, connection))
+        change_password_button.image = change_image
+        change_password_button.configure(relief = tk.FLAT)
+        change_password_button.grid(row = 0,
                              column = 2,
                              sticky = "w")
 
@@ -68,7 +68,7 @@ class ProfileFrame(tk.Frame):
         delete_user = tk.Button(header_holder,
                                 image = delete_image,
                                 bg = BG_APP,
-                                command = lambda: delete_current_user(self, self.user[0], self.user[2], self.user[3], window, connection))
+                                command = lambda: delete_current_user(self, self.user, window, connection))
         delete_user.image = delete_image
         delete_user.configure(relief = tk.FLAT)
         delete_user.grid(row = 0,
@@ -115,7 +115,7 @@ class ProfileFrame(tk.Frame):
 
     def logoff(self, window):
         """Clears the user info and the frame with the loaded accounts"""
-        self.user = [None, "Placeholder", None]
+        self.user = [None, "UserNickname", None, "UserPassword", None]
 
         self.accounts_holder.destroy()
         self.accounts_holder = None

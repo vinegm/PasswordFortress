@@ -3,7 +3,6 @@ from tkinter import filedialog
 from src.utils import *
 from src.settings import *
 from src.profileframe.utils.logohandler import *
-from src.profileframe.utils.positionpopup import *
 
 
 def add_account(profile_frame: tk.Frame, window: tk.Tk, connection) -> None:
@@ -118,7 +117,7 @@ def add_account(profile_frame: tk.Frame, window: tk.Tk, connection) -> None:
                   sticky = "nse")
 
     user_id = profile_frame.user[0]
-    key = profile_frame.user[2]
+    key = profile_frame.user[4]
     get_account_info = lambda: [plataform.get(),
                                 encrypt_data(login.get(), key),
                                 encrypt_data(password.get(), key),

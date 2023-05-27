@@ -30,7 +30,7 @@ def login_User(username_entry: tk.Entry, password_entry: tk.Entry, widgets: dict
                         fg = TIMEOUT_LOGIN_FG)
         return
 
-    hashed_password = hash_check(password, user_info[3])
+    hashed_password = hash_wsalt(password, user_info[3])
     if hashed_password != user_info[4]:
         tries_left = failed_login(user_info[0], user_info[5], user_info[6], connection)
 

@@ -5,5 +5,6 @@ from src.profileframe.utils.deleteuser import *
 from src.profileframe.utils.addaccount import *
 from src.profileframe.utils.editaccount import *
 from src.profileframe.utils.logohandler import *
+from src.profileframe.utils.changepassword import *
 from src.profileframe.utils.accountshandler import *
 from src.profileframe.utils.visibilityhandler import *

@@ -1,10 +1,9 @@
 import tkinter as tk
 from tkinter import messagebox
-from src.settings import *
 from src.utils import *
-from src.profileframe.utils.positionpopup import *
+from src.settings import *
 
-def delete_current_user(profile_frame: tk.Frame, user_id: int, user_salt: bytes, user_password: bytes, window: tk.Tk, connection) -> None:
+def delete_current_user(profile_frame: tk.Frame, user_info: list, window: tk.Tk, connection) -> None:
     """A popup asking to confirm the password to delete the user"""
     popup = tk.Toplevel(bg = BG_APP)
 
@@ -35,8 +34,7 @@ def delete_current_user(profile_frame: tk.Frame, user_id: int, user_salt: bytes,
                   fill = "x",
                   padx = 10,
                   pady = 5)
-    password.bind("<Return>", lambda event: check_password(profile_frame, user_id, user_password, user_salt, password.get(),
-                                                           window, connection))
+    password.bind("<Return>", lambda event: check_password(profile_frame, user_info, password.get(), window, connection))
 
     buttons_holder = tk.Frame(popup,
                               bg = BG_APP)
@@ -49,8 +47,7 @@ def delete_current_user(profile_frame: tk.Frame, user_id: int, user_salt: bytes,
                         font = PROFILE_WIDGETS_FONT,
                         fg = FG,
                         bg = BUTTONS_BG,
-                        command = lambda: check_password(profile_frame, user_id, user_password, user_salt, password.get(),
-                                                         window, connection))
+                        command = lambda: check_password(profile_frame, user_info, password.get(), window, connection))
     confirm.grid(row = 0,
                  column = 0,
                  padx = 10)
@@ -70,11 +67,11 @@ def delete_current_user(profile_frame: tk.Frame, user_id: int, user_salt: bytes,
     return
 
 
-def check_password(profile_frame: tk.Frame, user_id: int, password: bytes, salt: bytes, typed_password: str, window: tk.Tk, connection) -> None:
+def check_password(profile_frame: tk.Frame, user_info: list, typed_password: str, window: tk.Tk, connection) -> None:
     """Checks if the typed password is correct and asks for confirmation"""
-    if password == hash_check(typed_password, salt):
+    if user_info[3] == hash_wsalt(typed_password, user_info[2]):
         if messagebox.askokcancel("Confirmation", "Are you sure?"):
-            delete_user(user_id, connection)
+            delete_user(user_info[0], connection)
             profile_frame.logoff(window)
         
     else:

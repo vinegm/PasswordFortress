@@ -11,7 +11,7 @@ def entry_focus_in(entry: tk.Entry, entry_hint: str):
     """
     if entry.get() == entry_hint:
         entry.delete(0, tk.END)
-        if entry_hint == LOGIN_PASSWORD_HINT or entry_hint == REGISTER_PASSWORD_HINT or entry_hint == REGISTER_CONFIRM_PASSWORD_HINT:
+        if entry_hint in HINTS_HIDE_BOX:
             entry.config(fg = FG,
                          show= "*")
         else:
@@ -27,7 +27,7 @@ def entry_focus_out(entry: tk.Entry, entry_hint: str):
     """
     if entry.get() == "":
         entry.insert(0, entry_hint)
-        if entry_hint == LOGIN_PASSWORD_HINT or entry_hint == REGISTER_PASSWORD_HINT or entry_hint == REGISTER_CONFIRM_PASSWORD_HINT:
+        if entry_hint in HINTS_HIDE_BOX:
             entry.configure(fg = HINT_FG,
                             show = "")
         else:

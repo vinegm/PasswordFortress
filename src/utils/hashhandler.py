@@ -17,7 +17,7 @@ def hash_info(data: str) -> bytes:
     return hashed_data, salt
 
 
-def hash_check(data: str, salt: bytes):
+def hash_wsalt(data: str, salt: bytes):
     """Hashes a given input with the given salt for checking the password
     
     Parameters:
