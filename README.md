@@ -101,3 +101,25 @@ When clicking the plus button on the bottom of the window, a popup comes up aski
 If you wish to, you can also generate a password when adding a account
 
 ![image](https://github.com/vinegm/PasswordFortress/assets/117782568/2ce5f0ef-78ab-469a-aa9b-958e8d094a93)
+
+By clicking in the pencil a user can edit the information of a account
+
+![image](https://github.com/vinegm/PasswordFortress/assets/117782568/b9f9eceb-cef3-43ab-9687-f59711ecdb1d)
+
+The trash button delete a account, and the eye in the bottom left of each account shows/hides the given account password
+
+![image](https://github.com/vinegm/PasswordFortress/assets/117782568/209c2ca2-7bff-4879-a75b-cc8758900c42)
+
+<h3>Deleting a user</h3>
+
+When trying to delete a user with the trash on the top right, it will as for the user's password as confirmation and then delete the user and accounts linked to him from the database
+
+![image](https://github.com/vinegm/PasswordFortress/assets/117782568/0dde3f54-8948-4a96-acd5-cfb5ecae0873)
+
+<h3>Changing Password</h3>
+
+When trying to change the password of the user it will ask for the old password and new, and a confirmation of the new, it will generate a new cryptographic key and re-cryptograph all the accounts logins and passwords
+
+<h2>Thank You!!</h2>
+
+Thanks for taking a look at my project, if you find a security issue with it, fell free to make a PR, I'll appreciate it!
